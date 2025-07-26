@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Nueva Reparación</title>
+  <link rel="stylesheet" href="/css/form-reparacion.css">
+</head>
+<body>
+
+<!-- Logo institucional -->
+<header class="top-header">
+  <img src="/img/logo.png" alt="Logo STE" class="logo-ste" />
+</header>
+
+<!-- Botón “Regresar” -->
+<div class="logout-wrapper">
+  <button
+    type="button"
+    id="logoutBtn"
+    class="btn logout"
+    onclick="window.location.href='http://127.0.0.1:5500/views/pages/dashboard.html'">
+    Regresar
+  </button>
+</div>
+
+
+  <div class="container">
+    <h1>Registrar nueva reparación</h1>
+
+    <!-- <<< Mensaje de registro >>> -->
+    <% if (success) { %>
+      <div class="alert success">
+        ¡Reparación registrada con éxito!
+      </div>
+    <% } %>
+
+    <div class="form-box">
+      <form action="/reparaciones" method="post">
+        
+        <!-- Tipo de Equipo -->
+        <div class="input-box">
+          <select id="tipo_equipo" name="tipo_id" required>
+            <option value="">-- Selecciona el tipo de equipo -- ⬇️</option>
+            <% tipos.forEach(tipo => { %>
+              <option value="<%= tipo.tipo_id %>"><%= tipo.nombre %></option>
+            <% }) %>
+          </select>
+        </div>
+
+
+        <!-- Marca -->
+        <div class="input-box">
+          <select id="marca" name="marca_id" required>
+            <option value="">-- Selecciona una marca -- ⬇️</option>
+            <% marcas.forEach(m => { %>
+              <option value="<%= m.marca_id %>"><%= m.nombre %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <!-- Modelo -->
+        <div class="input-box">
+          <select id="modelo" name="modelo_id" required>
+            <option value="">-- Selecciona un modelo -- ⬇️</option>
+            <% modelos.forEach(mo => { %>
+              <option value="<%= mo.modelo_id %>"><%= mo.nombre %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <!-- Inventario del equipo -->
+        <div class="input-box">
+          <input
+            type="text"
+            id="inventario_equipo"
+            name="inventario_equipo"
+            placeholder="Inventario del equipo"
+            maxlength="15"
+            required
+          >
+        </div>
+
+        <!-- Refacción -->
+        <div class="input-box">
+          <select id="refaccion" name="refaccion_id" required>
+            <option value="">-- Selecciona una refacción -- ⬇️</option>
+            <% refacciones.forEach(r => { %>
+              <option value="<%= r.refaccion_id %>"><%= r.nombre %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <!-- Inventario de refacción -->
+        <div class="input-box">
+          <input
+            type="text"
+            id="inventario_refaccion"
+            name="inventario_refaccion"
+            placeholder="Inventario de refacción"
+            maxlength="15"
+            required
+          >
+        </div>
+
+        <!-- Descripción -->
+        <div class="input-box">
+          <textarea
+            id="descripcion"
+            name="descripcion"
+            rows="4"
+            placeholder="Descripción de la reparación"
+            maxlength="200"
+            required
+          ></textarea>
+        </div>
+
+        <!-- Expediente -->
+        <div class="input-box">
+          <input
+            type="text"
+            id="expediente"
+            name="expediente"
+            placeholder="Expediente del usuario"
+            maxlength="5"
+            required
+          >
+        </div>
+
+        <!-- Nombre -->
+        <div class="input-box">
+          <input
+            type="text"
+            id="nombre"
+            name="nombre"
+            placeholder="Nombre del usuario"
+            maxlength="50"
+            required
+          >
+        </div>
+
+        <!-- Área -->
+        <div class="input-box">
+          <select id="area" name="area_id" required>
+            <option value="">-- Selecciona un área -- ⬇️</option>
+            <% areas.forEach(a => { %>
+              <option value="<%= a.area_id %>"><%= a.nombre %></option>
+            <% }) %>
+          </select>
+        </div>
+
+        <button type="submit" class="btn">Guardar reparación</button>
+      </form>
+    </div>
+  </div>
+</body>
+</html>
