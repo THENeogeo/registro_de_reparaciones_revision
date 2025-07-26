@@ -33,7 +33,7 @@ app.get('/dashboard.html', (req, res) => {
 app.get('/reparaciones/nueva', async (req, res, next) => {
   try {
     const [tipos]       = await pool.query('SELECT tipo_id, nombre FROM tipos_equipos');
-    const [marcas]      = await pool.query('SELECT marca_id, nombre FROM marcas');
+    //const [marcas]      = await pool.query('SELECT marca_id, nombre FROM marcas');
     const [modelos]     = await pool.query('SELECT modelo_id, nombre FROM modelos');
     const [equipos]     = await pool.query('SELECT equipo_id, nombre FROM equipos');
     const [refacciones] = await pool.query('SELECT refaccion_id, nombre FROM refacciones');
@@ -43,7 +43,7 @@ app.get('/reparaciones/nueva', async (req, res, next) => {
 
     res.render('form-reparacion', {
       tipos,
-      marcas,
+      //marcas,
       modelos,
       equipos,
       refacciones,
@@ -52,6 +52,20 @@ app.get('/reparaciones/nueva', async (req, res, next) => {
     });
   } catch (err) {
     next(err);
+  }
+});
+
+// Endpoint para obtener marcas por tipo_id
+app.get('/marcas/:tipo_id', async (req, res) => {
+  try {
+    const tipoId = req.params.tipo_id;
+    const [marcas] = await pool.query(
+      'SELECT marca_id, nombre FROM marcas WHERE tipo_id = ?',
+      [tipoId]
+    );
+    res.json(marcas);
+  } catch (err) {
+    res.status(500).json({ error: 'Error al obtener marcas' });
   }
 });
 
