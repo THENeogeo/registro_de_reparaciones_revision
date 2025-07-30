@@ -34,7 +34,7 @@ app.get('/reparaciones/nueva', async (req, res, next) => {
   try {
     const [tipos]       = await pool.query('SELECT tipo_id, nombre FROM tipos_equipos');
     //const [marcas]      = await pool.query('SELECT marca_id, nombre FROM marcas');
-    const [modelos]     = await pool.query('SELECT modelo_id, nombre FROM modelos');
+    //const [modelos]     = await pool.query('SELECT modelo_id, nombre FROM modelos');
     const [equipos]     = await pool.query('SELECT equipo_id, nombre FROM equipos');
     const [refacciones] = await pool.query('SELECT refaccion_id, nombre FROM refacciones');
     const [areas]       = await pool.query('SELECT area_id, nombre FROM areas');
@@ -44,7 +44,7 @@ app.get('/reparaciones/nueva', async (req, res, next) => {
     res.render('form-reparacion', {
       tipos,
       //marcas,
-      modelos,
+      //modelos,
       equipos,
       refacciones,
       areas,
@@ -55,7 +55,7 @@ app.get('/reparaciones/nueva', async (req, res, next) => {
   }
 });
 
-// Endpoint para obtener marcas por tipo_id
+// Endpoint para obtener marcas por tipo_id dinámicamente
 app.get('/marcas/:tipo_id', async (req, res) => {
   try {
     const tipoId = req.params.tipo_id;
@@ -69,10 +69,27 @@ app.get('/marcas/:tipo_id', async (req, res) => {
   }
 });
 
+// Endpoint para obtener modelos por marca_id dinámicamente
+app.get('/modelos/:marcaId', async (req, res) => {
+  const { marcaId } = req.params;
+
+  try {
+    const [modelos] = await pool.query(
+      'SELECT modelo_id, nombre FROM modelos WHERE marca_id = ?',
+      [marcaId]
+    );
+    res.json(modelos);
+  } catch (error) {
+    console.error('Error al obtener modelos:', error);
+    res.status(500).json({ error: 'Error al obtener modelos' });
+  }
+});
+
+
 // Procesar envío del formulario
 app.post('/reparaciones', async (req, res, next) => {
   const {
-    equipo_id,
+    modelo_id,
     inventario_equipo,
     refaccion_id,
     inventario_refaccion,
@@ -103,9 +120,9 @@ app.post('/reparaciones', async (req, res, next) => {
     // 3. Insertar reparación
     await pool.query(
       `INSERT INTO reparacion
-         (equipo_id, inventario, refaccion_id, descripcion, fecha, usuario_id)
+         (modelo_id, inventario, refaccion_id, descripcion, fecha, usuario_id)
        VALUES (?, ?, ?, ?, CURDATE(), ?)`,
-      [equipo_id, inventario_equipo, refaccion_id, descripcion, usuario_id]
+      [modelo_id, inventario_equipo, refaccion_id, descripcion, usuario_id]
     );
 
     res.redirect('/reparaciones/nueva?success=1');

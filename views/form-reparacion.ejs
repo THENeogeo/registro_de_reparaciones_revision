@@ -59,9 +59,7 @@
       <div class="input-box">
         <select id="modelo" name="modelo_id" required>
           <option value="">-- Selecciona un modelo -- ⬇️</option>
-          <% modelos.forEach(mo => { %>
-            <option value="<%= mo.modelo_id %>"><%= mo.nombre %></option>
-          <% }) %>
+          <!-- Los modelos se cargarán dinámicamente desde el cliente-->
         </select>
       </div>
 
@@ -200,6 +198,36 @@
         marcaSelect.innerHTML = '<option value="">Error al cargar</option>';
       }
     });
+  });
+
+  //Script para cargar los modelos dinámicamente
+  document.getElementById('marca').addEventListener('change', async function () {
+    const marcaId = this.value;
+    const modeloSelect = document.getElementById('modelo');
+    
+    if (!marcaId) {
+      modeloSelect.innerHTML = '<option value="">Selecciona una marca primero</option>';
+      return;
+    }
+
+    try {
+      modeloSelect.innerHTML = '<option value="">Cargando modelos...</option>';
+      const response = await fetch(`/modelos/${marcaId}`);
+      if (!response.ok) throw new Error('Fallo al cargar modelos');
+
+      const modelos = await response.json();
+
+      modeloSelect.innerHTML = '<option value="">Selecciona un modelo</option>';
+      modelos.forEach(modelo => {
+        const option = document.createElement('option');
+        option.value = modelo.modelo_id;
+        option.textContent = modelo.nombre;
+        modeloSelect.appendChild(option);
+      });
+    } catch (error) {
+      console.error('Error cargando modelos:', error);
+      modeloSelect.innerHTML = '<option value="">Error al cargar</option>';
+    }
   });
 </script>
 
