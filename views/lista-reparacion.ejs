@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Lista de Reparaciones</title>
+  <link rel="stylesheet" href="/css/form-reparacion.css">
+</head>
+<body>
+
+<header class="top-header">
+  <img src="/img/logo.png" alt="Logo STE" class="logo-ste" />
+</header>
+
+<div class="logout-wrapper">
+  <button
+    type="button"
+    class="btn logout"
+    onclick="window.location.href='/dashboard.html'">
+    Regresar
+  </button>
+</div>
+
+<div class="container">
+  <h1>Reparaciones Registradas</h1>
+
+  <div class="form-box" style="padding: 20px; max-height: 500px; overflow-y: auto;">
+    <% if (reparaciones.length === 0) { %>
+      <div class="alert success">No hay reparaciones registradas.</div>
+    <% } else { %>
+      <% reparaciones.forEach(rep => { %>
+        <div class="input-box" style="background: #f9f9f9; padding: 15px; border-radius: 10px;">
+          <p><strong>Tipo de Equipo:</strong> <%= rep.tipo_equipo %></p>
+          <p><strong>Marca:</strong> <%= rep.marca %></p>
+          <p><strong>Modelo:</strong> <%= rep.modelo %></p>
+          <p><strong>Inventario Equipo:</strong> <%= rep.inventario_equipo %></p>
+          <p><strong>Refacción:</strong> <%= rep.nombre_refaccion %></p>
+          <p><strong>Inventario Refacción:</strong> <%= rep.inventario_refaccion %></p>
+          <p><strong>Descripción:</strong> <%= rep.descripcion_reparacion %></p>
+          <p><strong>Fecha:</strong> <%= rep.fecha_reparacion.toLocaleDateString() %></p>
+          <p><strong>Expediente Usuario:</strong> <%= rep.expediente_usuario %></p>
+          <p><strong>Área:</strong> <%= rep.area_usuario %></p>
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
+</div>
+
+</body>
+</html>

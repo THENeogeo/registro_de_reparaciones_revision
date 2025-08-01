@@ -4,13 +4,13 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Panel de Control</title>
-  <link rel="stylesheet" href="/public/css/dashboard.css" />
+  <link rel="stylesheet" href="/css/dashboard.css" />
 </head>
 <body>
 
   <!-- 🟢 Logo institucional -->
   <header class="top-header">
-    <img src="/public/img/logo.png" alt="Logo STE" class="logo-ste" />
+    <img src="/img/logo.png" alt="Logo STE" class="logo-ste" />
   </header>
 
   <!-- 🔵 Botón cerrar sesión → esquina superior derecha -->
@@ -27,11 +27,11 @@
   <!-- 🟢 Tarjetas -->
   <main class="dashboard">
     <div class="menu-container">
-      <div class="menu-card" onclick="window.location.href='http://localhost:3000/reparaciones/nueva'">
+      <div class="menu-card" onclick="window.location.href='/reparaciones/nueva'">
         <h2>Registrar nueva reparación</h2>
         <p>Agregar un nuevo registro al sistema</p>
       </div>
-      <div class="menu-card" onclick="window.location.href='#'">
+      <div class="menu-card" onclick="window.location.href='/reparaciones/lista'">
         <h2>Ver todas las reparaciones</h2>
         <p>Listado de reparaciones</p>
       </div>
@@ -46,6 +46,6 @@
     </div>
   </main>
 
-  <script src="/public/js/auth.js"></script>
+  <script src="/js/auth.js"></script>
 </body>
 </html>

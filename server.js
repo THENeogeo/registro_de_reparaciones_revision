@@ -13,6 +13,9 @@ app.set('views', path.join(__dirname, 'views'));
 // Archivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: false }));
+app.use(express.json()); // Para parsear JSON en login
+app.use(express.static('public'));
+
 
 // Pool de conexión MySQL
 const pool = mysql.createPool({
@@ -24,9 +27,15 @@ const pool = mysql.createPool({
   connectionLimit: 10,
 });
 
+
+// Ruta de index
+app.get('/', (req, res) => {
+  res.sendFile(path.join(__dirname, 'views', 'pages', 'index.html'));
+});
+
 // Ruta directa al dashboard
 app.get('/dashboard.html', (req, res) => {
-  res.sendFile(path.join(__dirname, 'dashboard.html'));
+  res.sendFile(path.join(__dirname, 'views', 'pages', 'dashboard.html'));
 });
 
 // Mostrar formulario de nueva reparación
@@ -129,6 +138,54 @@ app.post('/reparaciones', async (req, res, next) => {
   } catch (err) {
     next(err);
   }
+});
+
+// Mostrar lista de reparaciones
+app.get('/reparaciones/lista', async (req, res, next) => {
+  try {
+    const [rows] = await pool.query(`
+      SELECT 
+        te.nombre AS tipo_equipo,
+        m.nombre AS marca,
+        mo.nombre AS modelo,
+        r.inventario AS inventario_equipo,
+        rf.nombre AS nombre_refaccion,
+        rf.refaccion_inventario AS inventario_refaccion,
+        r.descripcion AS descripcion_reparacion,
+        r.fecha AS fecha_reparacion,
+        u.expediente AS expediente_usuario,
+        a.nombre AS area_usuario
+      FROM reparacion r
+      JOIN modelos mo ON r.modelo_id = mo.modelo_id
+      JOIN marcas m ON mo.marca_id = m.marca_id
+      JOIN tipos_equipos te ON m.tipo_id = te.tipo_id
+      LEFT JOIN refacciones rf ON r.refaccion_id = rf.refaccion_id
+      JOIN usuarios u ON r.usuario_id = u.usuario_id
+      JOIN areas a ON u.area_id = a.area_id
+      ORDER BY r.fecha DESC
+    `);
+
+    res.render('lista-reparacion', {
+      title: 'Lista de Reparaciones',
+      reparaciones: rows
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+// NUEVA RUTA: Validar login para usuario único "Administrador"
+app.post('/login', (req, res) => {
+  const { username, password } = req.body;
+
+  const ADMIN_USER = 'Administrador';
+  const ADMIN_PASS = 'admin';
+
+  if (username === ADMIN_USER && password === ADMIN_PASS) {
+    return res.json({ success: true });
+  }
+
+  return res.status(401).json({ success: false, message: 'Credenciales incorrectas' });
 });
 
 // Manejador de errores
