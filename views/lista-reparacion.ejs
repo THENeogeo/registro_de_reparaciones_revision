@@ -4,6 +4,88 @@
   <meta charset="UTF-8">
   <title>Lista de Reparaciones</title>
   <link rel="stylesheet" href="/css/form-reparacion.css">
+  <style>
+    .search-bar-wrapper {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 20px;
+      padding: 0 40px;
+    }
+
+    .search-bar {
+      background-color: #ffffff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      max-width: 1000px;
+    }
+
+    .search-bar input,
+    .search-bar select {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 14px;
+      min-width: 150px;
+    }
+
+    .search-bar button {
+      padding: 10px 20px;
+      background-color: #27f50b;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .search-bar button:hover {
+      background-color: #5b7ede;
+      transform: translateY(-2px);
+    }
+
+    .form-box {
+      padding: 40px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .input-box {
+      position: relative;
+      margin: 20px 0;
+      background: #f9f9f9;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      transition: transform 0.3s ease;
+    }
+
+    .input-box:hover {
+      transform: translateY(-3px);
+      background: #f1f3f5;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 32px;
+      color: #ffffff;
+      padding-top: 30px;
+    }
+
+    .container {
+      width: 800px;
+      max-width: 95%;
+      background: #4361ee;
+      border-radius: 30px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+    }
+  </style>
 </head>
 <body>
 
@@ -12,23 +94,30 @@
 </header>
 
 <div class="logout-wrapper">
-  <button
-    type="button"
-    class="btn logout"
-    onclick="window.location.href='/dashboard.html'">
-    Regresar
-  </button>
+  <button type="button" class="btn logout" onclick="window.location.href='/dashboard.html'">Regresar</button>
 </div>
 
 <div class="container">
   <h1>Reparaciones Registradas</h1>
 
-  <div class="form-box" style="padding: 20px; max-height: 500px; overflow-y: auto;">
+  <!-- Barra de búsqueda alineada a la derecha -->
+  <div class="search-bar-wrapper">
+    <form action="/reparaciones/lista" method="GET" class="search-bar">
+      <input type="text" name="tipo_equipo" placeholder="Tipo de equipo" />
+      <input type="text" name="marca" placeholder="Marca" />
+      <input type="text" name="modelo" placeholder="Modelo" />
+      <input type="text" name="inventario_equipo" placeholder="Inventario equipo" />
+      <input type="date" name="fecha" />
+      <button type="submit">Buscar</button>
+    </form>
+  </div>
+
+  <div class="form-box">
     <% if (reparaciones.length === 0) { %>
       <div class="alert success">No hay reparaciones registradas.</div>
     <% } else { %>
       <% reparaciones.forEach(rep => { %>
-        <div class="input-box" style="background: #f9f9f9; padding: 15px; border-radius: 10px;">
+        <div class="input-box">
           <p><strong>Tipo de Equipo:</strong> <%= rep.tipo_equipo %></p>
           <p><strong>Marca:</strong> <%= rep.marca %></p>
           <p><strong>Modelo:</strong> <%= rep.modelo %></p>
