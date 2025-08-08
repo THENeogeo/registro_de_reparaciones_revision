@@ -16,7 +16,6 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.json()); // Para parsear JSON en login
 app.use(express.static('public'));
 
-
 // Pool de conexión MySQL
 const pool = mysql.createPool({
   host: 'localhost',
@@ -26,7 +25,6 @@ const pool = mysql.createPool({
   waitForConnections: true,
   connectionLimit: 10,
 });
-
 
 // Ruta de index
 app.get('/', (req, res) => {
@@ -94,7 +92,6 @@ app.get('/modelos/:marcaId', async (req, res) => {
   }
 });
 
-
 // Procesar envío del formulario
 app.post('/reparaciones', async (req, res, next) => {
   const {
@@ -140,10 +137,15 @@ app.post('/reparaciones', async (req, res, next) => {
   }
 });
 
-// Mostrar lista de reparaciones
+// Mostrar lista de reparaciones con filtros y opciones dinámicas para selects
 app.get('/reparaciones/lista', async (req, res, next) => {
+  const { tipo_equipo, marca, modelo, inventario_equipo, fecha } = req.query;
+
   try {
-    const [rows] = await pool.query(`
+    const connection = await pool.getConnection();
+
+    // Construir consulta con filtros si existen
+    let query = `
       SELECT 
         te.nombre AS tipo_equipo,
         m.nombre AS marca,
@@ -153,6 +155,7 @@ app.get('/reparaciones/lista', async (req, res, next) => {
         rf.refaccion_inventario AS inventario_refaccion,
         r.descripcion AS descripcion_reparacion,
         r.fecha AS fecha_reparacion,
+        u.nombre AS nombre_usuario,
         u.expediente AS expediente_usuario,
         a.nombre AS area_usuario
       FROM reparacion r
@@ -162,12 +165,58 @@ app.get('/reparaciones/lista', async (req, res, next) => {
       LEFT JOIN refacciones rf ON r.refaccion_id = rf.refaccion_id
       JOIN usuarios u ON r.usuario_id = u.usuario_id
       JOIN areas a ON u.area_id = a.area_id
-      ORDER BY r.fecha DESC
-    `);
+      WHERE 1=1
+    `;
 
+    const params = [];
+    if (tipo_equipo) {
+      query += ' AND te.nombre = ?';
+      params.push(tipo_equipo);
+    }
+    if (marca) {
+      query += ' AND m.nombre = ?';
+      params.push(marca);
+    }
+    if (modelo) {
+      query += ' AND mo.nombre = ?';
+      params.push(modelo);
+    }
+    if (inventario_equipo) {
+      query += ' AND r.inventario = ?';
+      params.push(inventario_equipo);
+    }
+    if (fecha) {
+      query += ' AND DATE(r.fecha) = ?';
+      params.push(fecha);
+    }
+
+    query += ' ORDER BY r.fecha DESC';
+
+    const [reparaciones] = await connection.query(query, params);
+
+    // Obtener opciones únicas para llenar selects (sin filtro)
+    const [tipos] = await connection.query(`SELECT DISTINCT te.nombre AS tipo_equipo FROM tipos_equipos te JOIN marcas m ON te.tipo_id = m.tipo_id JOIN modelos mo ON m.marca_id = mo.marca_id JOIN reparacion r ON mo.modelo_id = r.modelo_id`);
+    const [marcas] = await connection.query(`SELECT DISTINCT m.nombre AS marca FROM marcas m JOIN modelos mo ON m.marca_id = mo.marca_id JOIN reparacion r ON mo.modelo_id = r.modelo_id`);
+    const [modelos] = await connection.query(`SELECT DISTINCT mo.nombre AS modelo FROM modelos mo JOIN reparacion r ON mo.modelo_id = r.modelo_id`);
+    const [inventarios] = await connection.query(`SELECT DISTINCT r.inventario AS inventario_equipo FROM reparacion r`);
+    const [fechas] = await connection.query(`SELECT DISTINCT DATE(r.fecha) AS fecha FROM reparacion r ORDER BY fecha DESC`);
+
+    connection.release();
+
+    // Pasar también los valores seleccionados para que se mantengan seleccionados en el formulario
     res.render('lista-reparacion', {
       title: 'Lista de Reparaciones',
-      reparaciones: rows
+      reparaciones,
+      tipos,
+      marcas,
+      modelos,
+      inventarios,
+      fechas,
+      tipo_equipo: tipo_equipo || '',
+      marca: marca || '',
+      modelo: modelo || '',
+      inventario_equipo: inventario_equipo || '',
+      fecha: fecha || ''
     });
   } catch (err) {
     next(err);

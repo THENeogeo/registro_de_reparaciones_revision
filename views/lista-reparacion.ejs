@@ -100,14 +100,54 @@
 <div class="container">
   <h1>Reparaciones Registradas</h1>
 
-  <!-- Barra de búsqueda alineada a la derecha -->
+  <!-- Barra de búsqueda alineada a la derecha con selects dinámicos -->
   <div class="search-bar-wrapper">
     <form action="/reparaciones/lista" method="GET" class="search-bar">
-      <input type="text" name="tipo_equipo" placeholder="Tipo de equipo" />
-      <input type="text" name="marca" placeholder="Marca" />
-      <input type="text" name="modelo" placeholder="Modelo" />
-      <input type="text" name="inventario_equipo" placeholder="Inventario equipo" />
-      <input type="date" name="fecha" />
+      <select name="tipo_equipo">
+        <option value="">Tipo de equipo</option>
+        <% tipos.forEach(t => { %>
+          <option value="<%= t.tipo_equipo %>" <%= (t.tipo_equipo === (typeof tipo_equipo !== 'undefined' ? tipo_equipo : '')) ? 'selected' : '' %>>
+            <%= t.tipo_equipo %>
+          </option>
+        <% }) %>
+      </select>
+
+      <select name="marca">
+        <option value="">Marca</option>
+        <% marcas.forEach(m => { %>
+          <option value="<%= m.marca %>" <%= (m.marca === (typeof marca !== 'undefined' ? marca : '')) ? 'selected' : '' %>>
+            <%= m.marca %>
+          </option>
+        <% }) %>
+      </select>
+
+      <select name="modelo">
+        <option value="">Modelo</option>
+        <% modelos.forEach(mod => { %>
+          <option value="<%= mod.modelo %>" <%= (mod.modelo === (typeof modelo !== 'undefined' ? modelo : '')) ? 'selected' : '' %>>
+            <%= mod.modelo %>
+          </option>
+        <% }) %>
+      </select>
+
+      <select name="inventario_equipo">
+        <option value="">Inventario equipo</option>
+        <% inventarios.forEach(inv => { %>
+          <option value="<%= inv.inventario_equipo %>" <%= (inv.inventario_equipo === (typeof inventario_equipo !== 'undefined' ? inventario_equipo : '')) ? 'selected' : '' %>>
+            <%= inv.inventario_equipo %>
+          </option>
+        <% }) %>
+      </select>
+
+      <select name="fecha">
+        <option value="">Fecha</option>
+        <% fechas.forEach(f => { %>
+          <option value="<%= f.fecha.toISOString().split('T')[0] %>" <%= (f.fecha.toISOString().split('T')[0] === (typeof fecha !== 'undefined' ? fecha : '')) ? 'selected' : '' %>>
+            <%= f.fecha.toLocaleDateString() %>
+          </option>
+        <% }) %>
+      </select>
+
       <button type="submit">Buscar</button>
     </form>
   </div>
@@ -126,6 +166,7 @@
           <p><strong>Inventario Refacción:</strong> <%= rep.inventario_refaccion %></p>
           <p><strong>Descripción:</strong> <%= rep.descripcion_reparacion %></p>
           <p><strong>Fecha:</strong> <%= rep.fecha_reparacion.toLocaleDateString() %></p>
+          <p><strong>Usuario:</strong> <%= rep.nombre_usuario %></p>
           <p><strong>Expediente Usuario:</strong> <%= rep.expediente_usuario %></p>
           <p><strong>Área:</strong> <%= rep.area_usuario %></p>
         </div>

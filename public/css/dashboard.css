@@ -38,9 +38,9 @@ body {
 /* Botón de cerrar sesión */
 .logout-wrapper {
   width: 100%;
-  max-width: 1200px;
+  max-width: 100%;
   margin: 1rem auto 0;
-  padding: 0 1.5rem;
+  padding-right: 0;
   display: flex;
   justify-content: flex-end;
 }
