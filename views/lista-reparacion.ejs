@@ -100,7 +100,7 @@
 <div class="container">
   <h1>Reparaciones Registradas</h1>
 
-  <!-- Barra de búsqueda alineada a la derecha con selects dinámicos -->
+  <!-- Barra de filtro con selects dinámicos -->
   <div class="search-bar-wrapper">
     <form action="/reparaciones/lista" method="GET" class="search-bar">
       <select name="tipo_equipo">
@@ -138,15 +138,21 @@
           </option>
         <% }) %>
       </select>
+      
+      <input 
+        type="date" 
+        name="fecha_inicio" 
+        value="<%= typeof fecha_inicio !== 'undefined' ? fecha_inicio : '' %>" 
+        placeholder="Fecha inicio" 
+      />
 
-      <select name="fecha">
-        <option value="">Fecha</option>
-        <% fechas.forEach(f => { %>
-          <option value="<%= f.fecha.toISOString().split('T')[0] %>" <%= (f.fecha.toISOString().split('T')[0] === (typeof fecha !== 'undefined' ? fecha : '')) ? 'selected' : '' %>>
-            <%= f.fecha.toLocaleDateString() %>
-          </option>
-        <% }) %>
-      </select>
+      <input 
+        type="date" 
+        name="fecha_fin" 
+        value="<%= typeof fecha_fin !== 'undefined' ? fecha_fin : '' %>" 
+        placeholder="Fecha fin" 
+      />
+
 
       <button type="submit">Buscar</button>
     </form>

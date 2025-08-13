@@ -40,9 +40,7 @@ app.get('/dashboard.html', (req, res) => {
 app.get('/reparaciones/nueva', async (req, res, next) => {
   try {
     const [tipos]       = await pool.query('SELECT tipo_id, nombre FROM tipos_equipos');
-    //const [marcas]      = await pool.query('SELECT marca_id, nombre FROM marcas');
-    //const [modelos]     = await pool.query('SELECT modelo_id, nombre FROM modelos');
-    const [equipos]     = await pool.query('SELECT equipo_id, nombre FROM equipos');
+    const [equipos]     = await pool.query('SELECT DISTINCT equipo_id, nombre FROM equipos');
     const [refacciones] = await pool.query('SELECT refaccion_id, nombre FROM refacciones');
     const [areas]       = await pool.query('SELECT area_id, nombre FROM areas');
 
@@ -50,8 +48,6 @@ app.get('/reparaciones/nueva', async (req, res, next) => {
 
     res.render('form-reparacion', {
       tipos,
-      //marcas,
-      //modelos,
       equipos,
       refacciones,
       areas,
@@ -139,12 +135,11 @@ app.post('/reparaciones', async (req, res, next) => {
 
 // Mostrar lista de reparaciones con filtros y opciones dinámicas para selects
 app.get('/reparaciones/lista', async (req, res, next) => {
-  const { tipo_equipo, marca, modelo, inventario_equipo, fecha } = req.query;
+  const { tipo_equipo, marca, modelo, inventario_equipo, fecha_inicio, fecha_fin } = req.query;
 
   try {
     const connection = await pool.getConnection();
 
-    // Construir consulta con filtros si existen
     let query = `
       SELECT 
         te.nombre AS tipo_equipo,
@@ -185,25 +180,31 @@ app.get('/reparaciones/lista', async (req, res, next) => {
       query += ' AND r.inventario = ?';
       params.push(inventario_equipo);
     }
-    if (fecha) {
-      query += ' AND DATE(r.fecha) = ?';
-      params.push(fecha);
+
+    // Filtrado por rango de fechas:
+    if (fecha_inicio && fecha_fin) {
+      query += ' AND r.fecha BETWEEN ? AND ?';
+      params.push(fecha_inicio, fecha_fin);
+    } else if (fecha_inicio) {
+      query += ' AND r.fecha >= ?';
+      params.push(fecha_inicio);
+    } else if (fecha_fin) {
+      query += ' AND r.fecha <= ?';
+      params.push(fecha_fin);
     }
 
     query += ' ORDER BY r.fecha DESC';
 
     const [reparaciones] = await connection.query(query, params);
 
-    // Obtener opciones únicas para llenar selects (sin filtro)
+    // Opciones para selects, sin cambiar:
     const [tipos] = await connection.query(`SELECT DISTINCT te.nombre AS tipo_equipo FROM tipos_equipos te JOIN marcas m ON te.tipo_id = m.tipo_id JOIN modelos mo ON m.marca_id = mo.marca_id JOIN reparacion r ON mo.modelo_id = r.modelo_id`);
     const [marcas] = await connection.query(`SELECT DISTINCT m.nombre AS marca FROM marcas m JOIN modelos mo ON m.marca_id = mo.marca_id JOIN reparacion r ON mo.modelo_id = r.modelo_id`);
     const [modelos] = await connection.query(`SELECT DISTINCT mo.nombre AS modelo FROM modelos mo JOIN reparacion r ON mo.modelo_id = r.modelo_id`);
     const [inventarios] = await connection.query(`SELECT DISTINCT r.inventario AS inventario_equipo FROM reparacion r`);
-    const [fechas] = await connection.query(`SELECT DISTINCT DATE(r.fecha) AS fecha FROM reparacion r ORDER BY fecha DESC`);
 
     connection.release();
 
-    // Pasar también los valores seleccionados para que se mantengan seleccionados en el formulario
     res.render('lista-reparacion', {
       title: 'Lista de Reparaciones',
       reparaciones,
@@ -211,17 +212,21 @@ app.get('/reparaciones/lista', async (req, res, next) => {
       marcas,
       modelos,
       inventarios,
-      fechas,
+      // fechas ya no es necesario porque quitas el select de fecha
+
+      // Pasar los filtros para que se mantengan seleccionados
       tipo_equipo: tipo_equipo || '',
       marca: marca || '',
       modelo: modelo || '',
       inventario_equipo: inventario_equipo || '',
-      fecha: fecha || ''
+      fecha_inicio: fecha_inicio || '',
+      fecha_fin: fecha_fin || ''
     });
   } catch (err) {
     next(err);
   }
 });
+
 
 // NUEVA RUTA: Validar login para usuario único "Administrador"
 app.post('/login', (req, res) => {
