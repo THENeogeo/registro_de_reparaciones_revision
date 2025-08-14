@@ -88,6 +88,24 @@ app.get('/modelos/:marcaId', async (req, res) => {
   }
 });
 
+// Endpoint para obtener refacciones por tipo de equipo
+app.get('/refacciones/:tipoId', async (req, res) => {
+  const { tipoId } = req.params;
+  try {
+    const [refacciones] = await pool.query(
+      `SELECT refaccion_id, nombre
+       FROM refacciones
+       WHERE tipo_id = ?`,
+      [tipoId]
+    );
+    res.json(refacciones);
+  } catch (error) {
+    console.error('Error al obtener refacciones:', error);
+    res.status(500).json({ error: 'Error al obtener refacciones' });
+  }
+});
+
+
 // Procesar envío del formulario
 app.post('/reparaciones', async (req, res, next) => {
   const {

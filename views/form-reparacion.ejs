@@ -76,9 +76,6 @@
       <div class="input-box">
         <select id="refaccion" name="refaccion_id" required>
           <option value="">-- Selecciona una refacción -- ⬇️</option>
-          <% refacciones.forEach(r => { %>
-            <option value="<%= r.refaccion_id %>"><%= r.nombre %></option>
-          <% }) %>
         </select>
       </div>
 
@@ -112,7 +109,7 @@
           type="text"
           id="expediente"
           name="expediente"
-          placeholder="Expediente del usuario (si se conoce)"
+          placeholder="Expediente del usuario"
           maxlength="5"
           required
         >
@@ -225,8 +222,41 @@
       console.error('Error cargando modelos:', error);
       modeloSelect.innerHTML = '<option value="">Error al cargar</option>';
     }
+  });  
+</script>
+
+<script>
+  // Script para cargar refacciones dinámicamente según tipo de equipo
+  document.getElementById('tipo_equipo').addEventListener('change', async function () {
+    const tipoId = this.value;
+    const refaccionSelect = document.getElementById('refaccion');
+
+    if (!tipoId) {
+      refaccionSelect.innerHTML = '<option value="">Selecciona un tipo primero</option>';
+      return;
+    }
+
+    try {
+      refaccionSelect.innerHTML = '<option value="">Cargando refacciones...</option>';
+      const response = await fetch(`/refacciones/${tipoId}`);
+      if (!response.ok) throw new Error('Fallo al cargar refacciones');
+
+      const refacciones = await response.json();
+
+      refaccionSelect.innerHTML = '<option value="">Selecciona una refacción</option>';
+      refacciones.forEach(ref => {
+        const option = document.createElement('option');
+        option.value = ref.refaccion_id;
+        option.textContent = ref.nombre;
+        refaccionSelect.appendChild(option);
+      });
+    } catch (error) {
+      console.error('Error cargando refacciones:', error);
+      refaccionSelect.innerHTML = '<option value="">Error al cargar</option>';
+    }
   });
 </script>
+
 
 </body>
 </html>
