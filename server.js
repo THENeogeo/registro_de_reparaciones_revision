@@ -120,7 +120,7 @@ app.post('/reparaciones', async (req, res, next) => {
   } = req.body;
 
   try {
-    // 1. Actualizar inventario de refacción (si aplica)
+    //Actualizar inventario de refacción
     await pool.query(
       `UPDATE refacciones
          SET refaccion_inventario = ?
@@ -128,7 +128,7 @@ app.post('/reparaciones', async (req, res, next) => {
       [inventario_refaccion, refaccion_id]
     );
 
-    // 2. Insertar usuario
+    // Insertar usuario
     const [userResult] = await pool.query(
       `INSERT INTO usuarios
          (expediente, nombre, area_id)
@@ -137,7 +137,7 @@ app.post('/reparaciones', async (req, res, next) => {
     );
     const usuario_id = userResult.insertId;
 
-    // 3. Insertar reparación
+    //Insertar reparación
     await pool.query(
       `INSERT INTO reparacion
          (modelo_id, inventario, refaccion_id, descripcion, fecha, usuario_id)
@@ -153,7 +153,7 @@ app.post('/reparaciones', async (req, res, next) => {
 
 // Mostrar lista de reparaciones con filtros y opciones dinámicas para selects
 app.get('/reparaciones/lista', async (req, res, next) => {
-  const { tipo_equipo, marca, modelo, inventario_equipo, fecha_inicio, fecha_fin } = req.query;
+  const { tipo_equipo, marca, modelo, inventario_equipo, fecha_inicio, fecha_fin, area } = req.query;
 
   try {
     const connection = await pool.getConnection();
@@ -198,6 +198,10 @@ app.get('/reparaciones/lista', async (req, res, next) => {
       query += ' AND r.inventario = ?';
       params.push(inventario_equipo);
     }
+    if (area) {
+      query += ' AND a.nombre = ?';
+      params.push(area);
+    }
 
     // Filtrado por rango de fechas:
     if (fecha_inicio && fecha_fin) {
@@ -215,11 +219,12 @@ app.get('/reparaciones/lista', async (req, res, next) => {
 
     const [reparaciones] = await connection.query(query, params);
 
-    // Opciones para selects, sin cambiar:
+    // Opciones para selects
     const [tipos] = await connection.query(`SELECT DISTINCT te.nombre AS tipo_equipo FROM tipos_equipos te JOIN marcas m ON te.tipo_id = m.tipo_id JOIN modelos mo ON m.marca_id = mo.marca_id JOIN reparacion r ON mo.modelo_id = r.modelo_id`);
     const [marcas] = await connection.query(`SELECT DISTINCT m.nombre AS marca FROM marcas m JOIN modelos mo ON m.marca_id = mo.marca_id JOIN reparacion r ON mo.modelo_id = r.modelo_id`);
     const [modelos] = await connection.query(`SELECT DISTINCT mo.nombre AS modelo FROM modelos mo JOIN reparacion r ON mo.modelo_id = r.modelo_id`);
     const [inventarios] = await connection.query(`SELECT DISTINCT r.inventario AS inventario_equipo FROM reparacion r`);
+    const [areas] = await connection.query(`SELECT DISTINCT a.nombre AS area FROM areas a JOIN usuarios u ON a.area_id = u.area_id JOIN reparacion r ON u.usuario_id = r.usuario_id`);
 
     connection.release();
 
@@ -230,13 +235,12 @@ app.get('/reparaciones/lista', async (req, res, next) => {
       marcas,
       modelos,
       inventarios,
-      // fechas ya no es necesario porque quitas el select de fecha
-
-      // Pasar los filtros para que se mantengan seleccionados
+      areas,
       tipo_equipo: tipo_equipo || '',
       marca: marca || '',
       modelo: modelo || '',
       inventario_equipo: inventario_equipo || '',
+      area: area || '',
       fecha_inicio: fecha_inicio || '',
       fecha_fin: fecha_fin || ''
     });
@@ -246,7 +250,7 @@ app.get('/reparaciones/lista', async (req, res, next) => {
 });
 
 
-// NUEVA RUTA: Validar login para usuario único "Administrador"
+// Login
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
 

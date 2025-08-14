@@ -37,7 +37,7 @@
       <!-- Tipo de Equipo -->
       <div class="input-box">
         <select id="tipo_equipo" name="tipo_id" required>
-          <option value="">-- Selecciona el tipo de equipo -- ⬇️</option>
+          <option value="">-- Selecciona un equipo -- ⬇️</option>
           <% tipos.forEach(tipo => { %>
             <option value="<%= tipo.tipo_id %>"><%= tipo.nombre %></option>
           <% }) %>
@@ -78,6 +78,15 @@
           <option value="">-- Selecciona una refacción -- ⬇️</option>
         </select>
       </div>
+
+      <!-- Tipo de refaccion EMPRESA / ESTERNO-->
+      <div class="input-box">
+        <select id="tipo_refaccion" name="tipo_refaccion" required>
+          <option value="">-- Selecciona el tipo de refacción -- ⬇️</option>
+          <option value="EMPRESA">Empresa</option>
+          <option value="EXTERNO">Externo</option>
+        </select>
+      </div> 
 
       <!-- Inventario de refacción -->
       <div class="input-box">

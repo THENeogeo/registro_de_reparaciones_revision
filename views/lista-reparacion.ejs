@@ -104,7 +104,7 @@
   <div class="search-bar-wrapper">
     <form action="/reparaciones/lista" method="GET" class="search-bar">
       <select name="tipo_equipo">
-        <option value="">Tipo de equipo</option>
+        <option value="">Equipo</option>
         <% tipos.forEach(t => { %>
           <option value="<%= t.tipo_equipo %>" <%= (t.tipo_equipo === (typeof tipo_equipo !== 'undefined' ? tipo_equipo : '')) ? 'selected' : '' %>>
             <%= t.tipo_equipo %>
@@ -131,7 +131,7 @@
       </select>
 
       <select name="inventario_equipo">
-        <option value="">Inventario equipo</option>
+        <option value="">Inventario</option>
         <% inventarios.forEach(inv => { %>
           <option value="<%= inv.inventario_equipo %>" <%= (inv.inventario_equipo === (typeof inventario_equipo !== 'undefined' ? inventario_equipo : '')) ? 'selected' : '' %>>
             <%= inv.inventario_equipo %>
@@ -152,6 +152,15 @@
         value="<%= typeof fecha_fin !== 'undefined' ? fecha_fin : '' %>" 
         placeholder="Fecha fin" 
       />
+
+      <select name="area">
+        <option value="">Área</option>
+        <% areas.forEach(a => { %>
+          <option value="<%= a.area %>" <%= (a.area === (typeof area !== 'undefined' ? area : '')) ? 'selected' : '' %>>
+            <%= a.area %>
+          </option>
+        <% }) %>
+      </select>
 
       <button type="submit">Buscar</button>
     </form>
