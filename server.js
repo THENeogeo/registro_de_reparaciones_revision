@@ -138,12 +138,16 @@ app.post('/reparaciones', async (req, res, next) => {
     );
     const usuario_id = userResult.insertId;
 
-    //Insertar reparación (fecha y hora)
+    //Insertar reparación (fecha y hora)    
+
+    const now = new Date(); 
+    const hora = now.toTimeString().split(' ')[0]; // Formato 'HH:MM:SS'
+
     await pool.query(
       `INSERT INTO reparacion
          (modelo_id, inventario, refaccion_id, descripcion, fecha, hora, usuario_id)
-       VALUES (?, ?, ?, ?, CURDATE(), CURTIME(), ?)`,
-      [modelo_id, inventario_equipo, refaccion_id, descripcion, usuario_id]
+       VALUES (?, ?, ?, ?, CURDATE(), ?, ?)`,
+      [modelo_id, inventario_equipo, refaccion_id, descripcion, hora, usuario_id]
     );
 
     res.redirect('/reparaciones/nueva?success=1');
