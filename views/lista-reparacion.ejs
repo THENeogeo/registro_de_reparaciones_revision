@@ -176,10 +176,18 @@
           <p><strong>Marca:</strong> <%= rep.marca %></p>
           <p><strong>Modelo:</strong> <%= rep.modelo %></p>
           <p><strong>Inventario Equipo:</strong> <%= rep.inventario_equipo %></p>
+          
           <p><strong>Refacción:</strong> <%= rep.nombre_refaccion %></p>
+          <p><strong>Tipo de Refacción:</strong> <%= rep.tipo_refaccion %></p>
+          
           <p><strong>Inventario Refacción:</strong> <%= rep.inventario_refaccion %></p>
           <p><strong>Descripción:</strong> <%= rep.descripcion_reparacion %></p>
-          <p><strong>Fecha:</strong> <%= rep.fecha_reparacion.toLocaleDateString() %></p>
+          
+          <p>
+            <strong>Fecha:</strong> <%= rep.fecha_reparacion.toLocaleDateString() %>  
+            <strong>Hora:</strong> <%= rep.fecha_reparacion.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) %>
+          </p>
+          
           <p><strong>Usuario:</strong> <%= rep.nombre_usuario %></p>
           <p><strong>Expediente Usuario:</strong> <%= rep.expediente_usuario %></p>
           <p><strong>Área:</strong> <%= rep.area_usuario %></p>

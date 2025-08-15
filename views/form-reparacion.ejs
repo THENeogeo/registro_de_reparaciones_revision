@@ -56,7 +56,6 @@
       <div class="input-box">
         <select id="modelo" name="modelo_id" required>
           <option value="">-- Selecciona un modelo -- ⬇️</option>
-          <!-- Los modelos se cargarán dinámicamente desde el cliente-->
         </select>
       </div>
 
@@ -79,14 +78,16 @@
         </select>
       </div>
 
-      <!-- Tipo de refaccion EMPRESA / ESTERNO-->
+      <!-- Tipo de refaccion-->
       <div class="input-box">
         <select id="tipo_refaccion" name="tipo_refaccion" required>
           <option value="">-- Selecciona el tipo de refacción -- ⬇️</option>
-          <option value="EMPRESA">Empresa</option>
-          <option value="EXTERNO">Externo</option>
+          <% tiposRef.forEach(tipo => { %>
+            <option value="<%= tipo.tipo_ref_id %>"><%= tipo.nombre %></option>
+          <% }) %>
         </select>
-      </div> 
+      </div>
+
 
       <!-- Inventario de refacción -->
       <div class="input-box">
@@ -265,7 +266,5 @@
     }
   });
 </script>
-
-
 </body>
 </html>

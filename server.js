@@ -13,7 +13,7 @@ app.set('views', path.join(__dirname, 'views'));
 // Archivos estáticos
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(bodyParser.urlencoded({ extended: false }));
-app.use(express.json()); // Para parsear JSON en login
+app.use(express.json());
 app.use(express.static('public'));
 
 // Pool de conexión MySQL
@@ -43,6 +43,7 @@ app.get('/reparaciones/nueva', async (req, res, next) => {
     const [equipos]     = await pool.query('SELECT DISTINCT equipo_id, nombre FROM equipos');
     const [refacciones] = await pool.query('SELECT refaccion_id, nombre FROM refacciones');
     const [areas]       = await pool.query('SELECT area_id, nombre FROM areas');
+    const [tiposRef]    = await pool.query('SELECT tipo_ref_id, nombre FROM tipo_refaccion');
 
     const success = req.query.success === '1';
 
@@ -51,6 +52,7 @@ app.get('/reparaciones/nueva', async (req, res, next) => {
       equipos,
       refacciones,
       areas,
+      tiposRef,
       success
     });
   } catch (err) {
@@ -75,7 +77,6 @@ app.get('/marcas/:tipo_id', async (req, res) => {
 // Endpoint para obtener modelos por marca_id dinámicamente
 app.get('/modelos/:marcaId', async (req, res) => {
   const { marcaId } = req.params;
-
   try {
     const [modelos] = await pool.query(
       'SELECT modelo_id, nombre FROM modelos WHERE marca_id = ?',
@@ -105,7 +106,6 @@ app.get('/refacciones/:tipoId', async (req, res) => {
   }
 });
 
-
 // Procesar envío del formulario
 app.post('/reparaciones', async (req, res, next) => {
   const {
@@ -116,16 +116,17 @@ app.post('/reparaciones', async (req, res, next) => {
     descripcion,
     expediente,
     nombre,
-    area_id
+    area_id,
+    tipo_refaccion
   } = req.body;
 
   try {
     //Actualizar inventario de refacción
     await pool.query(
       `UPDATE refacciones
-         SET refaccion_inventario = ?
+         SET refaccion_inventario = ?, tipo_ref_id = ?
        WHERE refaccion_id = ?`,
-      [inventario_refaccion, refaccion_id]
+      [inventario_refaccion, tipo_refaccion, refaccion_id]
     );
 
     // Insertar usuario
@@ -137,11 +138,11 @@ app.post('/reparaciones', async (req, res, next) => {
     );
     const usuario_id = userResult.insertId;
 
-    //Insertar reparación
+    //Insertar reparación (fecha y hora)
     await pool.query(
       `INSERT INTO reparacion
-         (modelo_id, inventario, refaccion_id, descripcion, fecha, usuario_id)
-       VALUES (?, ?, ?, ?, CURDATE(), ?)`,
+         (modelo_id, inventario, refaccion_id, descripcion, fecha, hora, usuario_id)
+       VALUES (?, ?, ?, ?, CURDATE(), CURTIME(), ?)`,
       [modelo_id, inventario_equipo, refaccion_id, descripcion, usuario_id]
     );
 
@@ -165,9 +166,11 @@ app.get('/reparaciones/lista', async (req, res, next) => {
         mo.nombre AS modelo,
         r.inventario AS inventario_equipo,
         rf.nombre AS nombre_refaccion,
+        tr.nombre AS tipo_refaccion,
         rf.refaccion_inventario AS inventario_refaccion,
         r.descripcion AS descripcion_reparacion,
         r.fecha AS fecha_reparacion,
+        r.hora AS hora_reparacion,
         u.nombre AS nombre_usuario,
         u.expediente AS expediente_usuario,
         a.nombre AS area_usuario
@@ -176,6 +179,7 @@ app.get('/reparaciones/lista', async (req, res, next) => {
       JOIN marcas m ON mo.marca_id = m.marca_id
       JOIN tipos_equipos te ON m.tipo_id = te.tipo_id
       LEFT JOIN refacciones rf ON r.refaccion_id = rf.refaccion_id
+      LEFT JOIN tipo_refaccion tr ON rf.tipo_ref_id = tr.tipo_ref_id
       JOIN usuarios u ON r.usuario_id = u.usuario_id
       JOIN areas a ON u.area_id = a.area_id
       WHERE 1=1
@@ -203,7 +207,6 @@ app.get('/reparaciones/lista', async (req, res, next) => {
       params.push(area);
     }
 
-    // Filtrado por rango de fechas:
     if (fecha_inicio && fecha_fin) {
       query += ' AND r.fecha BETWEEN ? AND ?';
       params.push(fecha_inicio, fecha_fin);
@@ -215,7 +218,8 @@ app.get('/reparaciones/lista', async (req, res, next) => {
       params.push(fecha_fin);
     }
 
-    query += ' ORDER BY r.fecha DESC';
+    // Ordenar por fecha y hora descendente
+    query += ' ORDER BY r.fecha DESC, r.hora DESC';
 
     const [reparaciones] = await connection.query(query, params);
 
@@ -248,7 +252,6 @@ app.get('/reparaciones/lista', async (req, res, next) => {
     next(err);
   }
 });
-
 
 // Login
 app.post('/login', (req, res) => {
