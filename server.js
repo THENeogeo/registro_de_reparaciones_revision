@@ -1,10 +1,15 @@
 // server.js
+
+require('dotenv').config({ path: './config.env' });
+
 const express    = require('express');
 const mysql      = require('mysql2/promise');
 const bodyParser = require('body-parser');
 const path       = require('path');
 
 const app = express();
+
+
 
 // Motor de vistas
 app.set('view engine', 'ejs');
@@ -16,14 +21,23 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(express.json());
 app.use(express.static('public'));
 
-// Pool de conexión MySQL
+// Pool de conexión MySQL c k c c / c u
+// const pool = mysql.createPool({
+//   host: 'localhost',
+//   user: 'root',
+//   password: 'admin',
+//   database: 'ControlDeReparaciones',
+//   waitForConnections: true,
+//   connectionLimit: 10,
+// });
+
 const pool = mysql.createPool({
-  host: 'localhost',
-  user: 'root',
-  password: 'admin',
-  database: 'ControlDeReparaciones',
-  waitForConnections: true,
-  connectionLimit: 10,
+    host: process.env.DB_HOST,      // ✅ Correcto - usa process.env
+    user: process.env.DB_USER,
+    password: process.env.DB_PASSWORD,
+    database: process.env.DB_NAME,
+    waitForConnections: true,
+    connectionLimit: 10,
 });
 
 // Ruta de index
