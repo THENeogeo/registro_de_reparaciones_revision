@@ -1,15 +1,11 @@
 // server.js
-
 require('dotenv').config({ path: './config.env' });
 
 const express    = require('express');
 const mysql      = require('mysql2/promise');
 const bodyParser = require('body-parser');
 const path       = require('path');
-
 const app = express();
-
-
 
 // Motor de vistas
 app.set('view engine', 'ejs');
