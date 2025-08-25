@@ -18,17 +18,9 @@ app.use(express.json());
 app.use(express.static('public'));
 
 // Pool de conexión MySQL c k c c / c u
-// const pool = mysql.createPool({
-//   host: 'localhost',
-//   user: 'root',
-//   password: 'admin',
-//   database: 'ControlDeReparaciones',
-//   waitForConnections: true,
-//   connectionLimit: 10,
-// });
 
 const pool = mysql.createPool({
-    host: process.env.DB_HOST,      // ✅ Correcto - usa process.env
+    host: process.env.DB_HOST,     
     user: process.env.DB_USER,
     password: process.env.DB_PASSWORD,
     database: process.env.DB_NAME,
@@ -45,6 +37,7 @@ app.get('/', (req, res) => {
 app.get('/dashboard.html', (req, res) => {
   res.sendFile(path.join(__dirname, 'views', 'pages', 'dashboard.html'));
 });
+
 
 // Mostrar formulario de nueva reparación
 app.get('/reparaciones/nueva', async (req, res, next) => {
@@ -267,6 +260,47 @@ app.get('/reparaciones/lista', async (req, res, next) => {
   }
 });
 
+// Ruta para mostrar formulario de consumibles
+app.get('/consumibles/nuevo', async (req, res) => {
+  try {
+    const [consumibles] = await pool.query("SELECT * FROM catalogo_consumibles");
+    const [tiposRef] = await pool.query("SELECT * FROM refacciones");
+    const [usuarios] = await pool.query("SELECT * FROM usuarios");
+    const [areas] = await pool.query("SELECT * FROM areas");
+
+    res.render('form-consumibles', { consumibles, tiposRef, usuarios, areas, success: false });
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error cargando formulario de consumibles");
+  }
+});
+
+// Ruta para guardar consumible
+app.post('/consumibles/nuevo', async (req, res) => {
+  try {
+    const { consumible_id, inventario, marca, modelo, tipo_ref_id, descripcion, usuario_id, area_id, fecha, hora } = req.body;
+
+    await connection.query(
+      `INSERT INTO registro_consumible 
+      (consumible_id, inventario, marca, modelo, tipo_ref_id, descripcion, usuario_id, area_id, fecha, hora) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+      [consumible_id, inventario, marca, modelo, tipo_ref_id, descripcion, usuario_id, area_id, fecha, hora]
+    );
+
+    const [consumibles] = await pool.query("SELECT * FROM catalogo_consumibles");
+    const [tiposRef] = await pool.query("SELECT * FROM refacciones");
+    const [usuarios] = await pool.query("SELECT * FROM usuarios");
+    const [areas] = await pool.query("SELECT * FROM areas");
+
+    res.render('form-consumibles', { consumibles, tiposRef, usuarios, areas, success: true });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).send("Error al guardar consumible");
+  }
+});
+
+
 // Login
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
@@ -292,4 +326,3 @@ const PORT = process.env.PORT;
 app.listen(PORT, () => {
   console.log(`✅✅ Servidor corriendo en http://localhost:${PORT} ✅✅`);
 });
-

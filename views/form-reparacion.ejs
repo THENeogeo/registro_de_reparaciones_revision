@@ -67,6 +67,7 @@
           name="inventario_equipo"
           placeholder="Inventario del equipo"
           maxlength="15"
+          oninput="this.value = this.value.replace(/[^0-9\-]/g, '')"
           required
         >
       </div>
@@ -116,11 +117,12 @@
       <!-- Expediente -->
       <div class="input-box">
         <input
-          type="text"
+          type="text
           id="expediente"
           name="expediente"
           placeholder="Expediente del usuario"
           maxlength="5"
+          oninput="this.value = this.value.replace(/[^0-9\- '')"
           required
         >
       </div>
@@ -133,6 +135,7 @@
           name="nombre"
           placeholder="Nombre del usuario"
           maxlength="50"
+          oninput="this.value = this.value.replace(/[^A-Za-z ]/g, '')"
           required
         >
       </div>
