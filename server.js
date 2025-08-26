@@ -109,7 +109,7 @@ app.get('/refacciones/:tipoId', async (req, res) => {
   }
 });
 
-// Procesar envío del formulario
+// Envío  del formulario
 app.post('/reparaciones', async (req, res, next) => {
   const {
     modelo_id,
@@ -158,6 +158,9 @@ app.post('/reparaciones', async (req, res, next) => {
     next(err);
   }
 });
+
+
+// -------------------------------------------Listado de reparaciones
 
 // Mostrar lista de reparaciones con filtros y opciones dinámicas para selects
 app.get('/reparaciones/lista', async (req, res, next) => {
@@ -260,42 +263,63 @@ app.get('/reparaciones/lista', async (req, res, next) => {
   }
 });
 
+//----------------------------------CONSUMIBLES----------------------------------------------------------------------
 // Ruta para mostrar formulario de consumibles
 app.get('/consumibles/nuevo', async (req, res) => {
   try {
     const [consumibles] = await pool.query("SELECT * FROM catalogo_consumibles");
-    const [tiposRef] = await pool.query("SELECT * FROM refacciones");
-    const [usuarios] = await pool.query("SELECT * FROM usuarios");
+    const [tiposRef] = await pool.query("SELECT tipo_ref_id, nombre FROM tipo_refaccion"); // asegúrate que 'nombre' existe
     const [areas] = await pool.query("SELECT * FROM areas");
+    const [usuarios] = await pool.query("SELECT usuario_id, nombre FROM usuarios"); // para mostrar lista de usuarios
 
-    res.render('form-consumibles', { consumibles, tiposRef, usuarios, areas, success: false });
+    res.render('form-consumibles', { consumibles, tiposRef, areas, usuarios, success: false });
   } catch (err) {
-    console.error(err);
+    console.error("Error cargando formulario de consumibles:", err);
     res.status(500).send("Error cargando formulario de consumibles");
   }
 });
 
+
 // Ruta para guardar consumible
 app.post('/consumibles/nuevo', async (req, res) => {
   try {
-    const { consumible_id, inventario, marca, modelo, tipo_ref_id, descripcion, usuario_id, area_id, fecha, hora } = req.body;
+    const 
+    { 
+      consumible_id, 
+      inventario, 
+      marca, 
+      modelo, 
+      tipo_ref_id, 
+      descripcion, 
+      nombre, 
+      area_id 
+    } = req.body;
 
-    await connection.query(
+    // Insertar nuevo usuario y obtener su ID
+    const [userResult] = await pool.query(
+      `INSERT INTO usuarios 
+        (expediente, nombre, area_id) 
+      VALUES (?, ?, ?)`,
+      [expediente, nombre, area_id]
+    );
+    const usuario_id = userResult.insertId;
+
+    // Insertar registro del consumible con el usuario recién creado
+    await pool.query(
       `INSERT INTO registro_consumible 
-      (consumible_id, inventario, marca, modelo, tipo_ref_id, descripcion, usuario_id, area_id, fecha, hora) 
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
-      [consumible_id, inventario, marca, modelo, tipo_ref_id, descripcion, usuario_id, area_id, fecha, hora]
+       (consumible_id, inventario, marca, modelo, tipo_ref_id, descripcion, usuario_id, area_id) 
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      [consumible_id, inventario, marca, modelo, tipo_ref_id, descripcion, usuario_id, area_id]
     );
 
+    // Volver a cargar datos para el formulario
     const [consumibles] = await pool.query("SELECT * FROM catalogo_consumibles");
-    const [tiposRef] = await pool.query("SELECT * FROM refacciones");
-    const [usuarios] = await pool.query("SELECT * FROM usuarios");
-    const [areas] = await pool.query("SELECT * FROM areas");
+    const [tiposRef] = await pool.query("SELECT tipo_ref_id, nombre FROM tipo_refaccion");
 
-    res.render('form-consumibles', { consumibles, tiposRef, usuarios, areas, success: true });
+    res.render('form-consumibles', { consumibles, tiposRef, success: true });
 
   } catch (err) {
-    console.error(err);
+    console.error("Error al guardar consumible:", err);
     res.status(500).send("Error al guardar consumible");
   }
 });

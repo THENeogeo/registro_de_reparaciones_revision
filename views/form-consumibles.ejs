@@ -50,6 +50,7 @@
           name="inventario" 
           placeholder="Inventario o número de serie"
           maxlength="15"
+          oninput="this.value = this.value.replace(/[^0-9\-]/g, '')"
           required
         >
       </div>
@@ -60,7 +61,7 @@
           id="marca" 
           name="marca" 
           placeholder="Marca del consumible"
-          maxlength="50"
+          maxlength="20"
           required
         >
       </div>
@@ -77,7 +78,7 @@
         >
       </div>
 
-      <!-- Tipo de Consumible / Utilizando tipo de refacción-->
+      <!-- Tipo de refaccion -->
       <div class="input-box">
         <select id="tipo_refaccion" name="tipo_refaccion" required>
           <option value="">-- Selecciona el tipo de consumible -- ⬇️</option>
@@ -99,7 +100,7 @@
         ></textarea>
       </div>
 
-      <!-- Usuario -->
+      <!-- Nombre del usuario -->
       <div class="input-box">
         <input
           type="text"
