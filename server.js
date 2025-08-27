@@ -279,44 +279,33 @@ app.get('/consumibles/nuevo', async (req, res) => {
   }
 });
 
-
 // Ruta para guardar consumible
 app.post('/consumibles/nuevo', async (req, res) => {
   try {
-    const 
-    { 
-      consumible_id, 
-      inventario, 
-      marca, 
-      modelo, 
-      tipo_ref_id, 
-      descripcion, 
-      nombre, 
-      area_id 
-    } = req.body;
+    const { consumible_id, inventario, marca, modelo, tipo_ref_id, descripcion, nombre, area_id } = req.body;
 
-    // Insertar nuevo usuario y obtener su ID
+    // Insertar usuario
     const [userResult] = await pool.query(
-      `INSERT INTO usuarios 
-        (expediente, nombre, area_id) 
-      VALUES (?, ?, ?)`,
-      [expediente, nombre, area_id]
+      `INSERT INTO usuarios (nombre, area_id) VALUES (?, ?)`,
+      [nombre, area_id]
     );
     const usuario_id = userResult.insertId;
 
-    // Insertar registro del consumible con el usuario recién creado
+    // Insertar consumible
     await pool.query(
       `INSERT INTO registro_consumible 
-       (consumible_id, inventario, marca, modelo, tipo_ref_id, descripcion, usuario_id, area_id) 
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
+      (consumible_id, inventario, marca, modelo, tipo_ref_id, descripcion, usuario_id, area_id) 
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
       [consumible_id, inventario, marca, modelo, tipo_ref_id, descripcion, usuario_id, area_id]
     );
 
-    // Volver a cargar datos para el formulario
+    // Recargar datos para el formulario
     const [consumibles] = await pool.query("SELECT * FROM catalogo_consumibles");
     const [tiposRef] = await pool.query("SELECT tipo_ref_id, nombre FROM tipo_refaccion");
+    const [areas] = await pool.query("SELECT * FROM areas");
 
-    res.render('form-consumibles', { consumibles, tiposRef, success: true });
+    // Renderizar de nuevo el formulario vacío con mensaje
+    res.render("/consumibles/nuevo", { consumibles, tiposRef, areas, success: true });
 
   } catch (err) {
     console.error("Error al guardar consumible:", err);
@@ -324,13 +313,12 @@ app.post('/consumibles/nuevo', async (req, res) => {
   }
 });
 
-
 // Login
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
 
-  const ADMIN_USER = 'Administrador';
-  const ADMIN_PASS = 'admin';
+  const ADMIN_USER = process.env.ADMIN_USER;
+  const ADMIN_PASS = process.env.ADMIN_PASS;
 
   if (username === ADMIN_USER && password === ADMIN_PASS) {
     return res.json({ success: true });
