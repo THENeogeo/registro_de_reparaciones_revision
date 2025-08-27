@@ -305,7 +305,7 @@ app.post('/consumibles/nuevo', async (req, res) => {
     const [areas] = await pool.query("SELECT * FROM areas");
 
     // Renderizar de nuevo el formulario vacío con mensaje
-    res.render("/consumibles/nuevo", { consumibles, tiposRef, areas, success: true });
+    res.render('form-consumibles', { consumibles, tiposRef, areas, success: true });
 
   } catch (err) {
     console.error("Error al guardar consumible:", err);
