@@ -313,6 +313,153 @@ app.post('/consumibles/nuevo', async (req, res) => {
   }
 });
 
+// ---------------------------------- LISTADO DE CONSUMIBLES
+app.get('/consumibles/lista', async (req, res, next) => {
+  const {
+    consumible_id,
+    marca,
+    modelo,
+    inventario,
+    tipo_ref_id,
+    area_id,
+    fecha_inicio,
+    fecha_fin,
+  } = req.query;
+
+  try {
+    const connection = await pool.getConnection();
+
+    let query = `
+      SELECT
+        DATE_FORMAT(rc.fecha, '%Y-%m-%d') AS fecha,
+        TIME_FORMAT(rc.hora, '%H:%i:%s') AS hora,
+        cc.nombre AS consumible,
+        rc.inventario,
+        rc.marca,
+        rc.modelo,
+        tr.nombre AS tipo_refaccion,
+        rc.descripcion,
+        u.nombre AS nombre_usuario,
+        a.nombre AS area
+      FROM registro_consumible rc
+      LEFT JOIN catalogo_consumibles cc ON rc.consumible_id = cc.consumible_id
+      LEFT JOIN tipo_refaccion tr ON rc.tipo_ref_id = tr.tipo_ref_id
+      LEFT JOIN usuarios u ON rc.usuario_id = u.usuario_id
+      LEFT JOIN areas a ON rc.area_id = a.area_id
+      WHERE 1=1
+    `;
+
+    const params = [];
+    if (consumible_id) {
+      query += ' AND rc.consumible_id = ?';
+      params.push(consumible_id);
+    }
+    if (marca) {
+      query += ' AND rc.marca = ?';
+      params.push(marca);
+    }
+    if (modelo) {
+      query += ' AND rc.modelo = ?';
+      params.push(modelo);
+    }
+    if (inventario) {
+      query += ' AND rc.inventario = ?';
+      params.push(inventario);
+    }
+    if (tipo_ref_id) {
+      query += ' AND rc.tipo_ref_id = ?';
+      params.push(tipo_ref_id);
+    }
+    if (area_id) {
+      query += ' AND rc.area_id = ?';
+      params.push(area_id);
+    }
+    if (fecha_inicio && fecha_fin) {
+      query += ' AND rc.fecha BETWEEN ? AND ?';
+      params.push(fecha_inicio, fecha_fin);
+    } else if (fecha_inicio) {
+      query += ' AND rc.fecha >= ?';
+      params.push(fecha_inicio);
+    } else if (fecha_fin) {
+      query += ' AND rc.fecha <= ?';
+      params.push(fecha_fin);
+    }
+
+    // Orden
+    query += ' ORDER BY rc.fecha DESC, rc.hora DESC';
+
+    const [registros] = await connection.query(query, params);
+
+    // Opciones para filtros
+    const [consumibles] = await connection.query(`
+      SELECT c.consumible_id, c.nombre
+      FROM catalogo_consumibles c
+      ORDER BY c.nombre
+    `);
+
+    const [tiposRef] = await connection.query(`
+      SELECT tipo_ref_id, nombre
+      FROM tipo_refaccion
+      ORDER BY nombre
+    `);
+
+    const [areas] = await connection.query(`
+      SELECT area_id, nombre
+      FROM areas
+      ORDER BY nombre
+    `);
+
+    const [marcas] = await connection.query(`
+      SELECT DISTINCT marca
+      FROM registro_consumible
+      WHERE marca IS NOT NULL AND marca <> ''
+      ORDER BY marca
+    `);
+
+    const [modelos] = await connection.query(`
+      SELECT DISTINCT modelo
+      FROM registro_consumible
+      WHERE modelo IS NOT NULL AND modelo <> ''
+      ORDER BY modelo
+    `);
+
+    const [inventarios] = await connection.query(`
+      SELECT DISTINCT inventario
+      FROM registro_consumible
+      WHERE inventario IS NOT NULL AND inventario <> ''
+      ORDER BY inventario
+    `);
+
+    connection.release();
+
+    res.render('lista-consumibles', {
+      title: 'Lista de Consumibles',
+      registros,
+
+      // opciones de selects
+      consumibles,
+      tiposRef,
+      areas,
+      marcas,
+      modelos,
+      inventarios,
+
+      // valores seleccionados (para mantener el estado del filtro)
+      consumible_id: consumible_id || '',
+      marca: marca || '',
+      modelo: modelo || '',
+      inventario: inventario || '',
+      tipo_ref_id: tipo_ref_id || '',
+      area_id: area_id || '',
+      fecha_inicio: fecha_inicio || '',
+      fecha_fin: fecha_fin || ''
+    });
+  } catch (err) {
+    next(err);
+  }
+});
+
+
 // Login
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
