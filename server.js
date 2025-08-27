@@ -304,7 +304,7 @@ app.post('/consumibles/nuevo', async (req, res) => {
     const [tiposRef] = await pool.query("SELECT tipo_ref_id, nombre FROM tipo_refaccion");
     const [areas] = await pool.query("SELECT * FROM areas");
 
-    // Renderizar de nuevo el formulario vacío con mensaje
+    //Redirecciona nuevamente al formulario vacio
     res.render('form-consumibles', { consumibles, tiposRef, areas, success: true });
 
   } catch (err) {
@@ -327,7 +327,6 @@ app.post('/login', (req, res) => {
   return res.status(401).json({ success: false, message: 'Credenciales incorrectas' });
 });
 
-// Manejador de errores
 app.use((err, req, res, next) => {
   console.error(err);
   res.status(500).send('Error interno: ' + err.message);
