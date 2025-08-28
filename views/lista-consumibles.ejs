@@ -190,6 +190,47 @@
       <% }) %>
     <% } %>
   </div>
+
+  <!-- Paginación -->
+  <div class="search-bar-wrapper" style="margin-top: 10px;">
+    <div class="search-bar" style="align-items:center; gap:10px;">
+      <form method="GET" action="/consumibles/lista" style="display:flex; gap:10px; align-items:center;">
+        <!-- preserva filtros como inputs ocultos -->
+        <input type="hidden" name="consumible_id" value="<%= consumible_id %>">
+        <input type="hidden" name="marca"         value="<%= marca %>">
+        <input type="hidden" name="modelo"        value="<%= modelo %>">
+        <input type="hidden" name="inventario"    value="<%= inventario %>">
+        <input type="hidden" name="tipo_ref_id"   value="<%= typeof tipo_ref_id !== 'undefined' ? tipo_ref_id : '' %>">
+        <input type="hidden" name="area_id"       value="<%= area_id %>">
+        <input type="hidden" name="fecha_inicio"  value="<%= fecha_inicio %>">
+        <input type="hidden" name="fecha_fin"     value="<%= fecha_fin %>">
+        <input type="hidden" name="limit"         value="<%= limit %>">
+        <input type="hidden" name="page"          value="<%= Math.max(page - 1, 1) %>">
+        <button type="submit" <%= page <= 1 ? 'disabled' : '' %>>« Anterior</button>
+      </form>
+
+      <div>
+        Página <strong><%= page %></strong> de <strong><%= totalPages %></strong>
+        — <%= total %> resultado(s)
+      </div>
+
+      <form method="GET" action="/consumibles/lista" style="display:flex; gap:10px; align-items:center;">
+        <!-- preserva filtros como inputs ocultos -->
+        <input type="hidden" name="consumible_id" value="<%= consumible_id %>">
+        <input type="hidden" name="marca"         value="<%= marca %>">
+        <input type="hidden" name="modelo"        value="<%= modelo %>">
+        <input type="hidden" name="inventario"    value="<%= inventario %>">
+        <input type="hidden" name="tipo_ref_id"   value="<%= typeof tipo_ref_id !== 'undefined' ? tipo_ref_id : '' %>">
+        <input type="hidden" name="area_id"       value="<%= area_id %>">
+        <input type="hidden" name="fecha_inicio"  value="<%= fecha_inicio %>">
+        <input type="hidden" name="fecha_fin"     value="<%= fecha_fin %>">
+        <input type="hidden" name="limit"         value="<%= limit %>">
+        <input type="hidden" name="page"          value="<%= Math.min(page + 1, totalPages) %>">
+        <button type="submit" <%= page >= totalPages ? 'disabled' : '' %>>Siguiente »</button>
+      </form>
+    </div>
+  </div>
+
 </div>
 
 </body>
