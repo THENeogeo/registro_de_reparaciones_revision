@@ -109,28 +109,21 @@ app.get('/refacciones/:tipoId', async (req, res) => {
   }
 });
 
-// Envío  del formulario
+// Envío del formulario de nueva reparación
 app.post('/reparaciones', async (req, res, next) => {
   const {
     modelo_id,
     inventario_equipo,
     refaccion_id,
-    inventario_refaccion,
+    refaccion_inventario,
     descripcion,
     expediente,
     nombre,
     area_id,
-    tipo_refaccion
+    tipo_ref_id
   } = req.body;
 
   try {
-    //Actualizar inventario de refacción
-    await pool.query(
-      `UPDATE refacciones
-         SET refaccion_inventario = ?, tipo_ref_id = ?
-       WHERE refaccion_id = ?`,
-      [inventario_refaccion, tipo_refaccion, refaccion_id]
-    );
 
     // Insertar usuario
     const [userResult] = await pool.query(
@@ -141,25 +134,27 @@ app.post('/reparaciones', async (req, res, next) => {
     );
     const usuario_id = userResult.insertId;
 
-    //Insertar reparación (fecha y hora)    
-
+    // Insertar reparación (fecha y hora)
     const now = new Date(); 
     const hora = now.toTimeString().split(' ')[0]; // Formato 'HH:MM:SS'
 
+    // Se insertan los datos en la tabla reparacion
     await pool.query(
       `INSERT INTO reparacion
-         (modelo_id, inventario, refaccion_id, descripcion, fecha, hora, usuario_id)
-       VALUES (?, ?, ?, ?, CURDATE(), ?, ?)`,
-      [modelo_id, inventario_equipo, refaccion_id, descripcion, hora, usuario_id]
+        (modelo_id, inventario, refaccion_id, descripcion, fecha, hora, usuario_id, refaccion_inventario, tipo_ref_id)
+      VALUES (?, ?, ?, ?, CURDATE(), ?, ?, ?, ?)`,
+      [modelo_id, inventario_equipo, refaccion_id, descripcion, hora, usuario_id, refaccion_inventario, tipo_ref_id]
     );
 
+    // Redirigir con mensaje de éxito
     res.redirect('/reparaciones/nueva?success=1');
   } catch (err) {
     next(err);
   }
 });
 
-// -------------------------------------------Listado de reparaciones (con paginación)
+// ////////////////////////////////////LISTADO DE REPARACIONES (PAGINACIÓN)
+
 app.get('/reparaciones/lista', async (req, res, next) => {
   const { tipo_equipo, marca, modelo, inventario_equipo, fecha_inicio, fecha_fin, area } = req.query;
 
@@ -168,7 +163,6 @@ app.get('/reparaciones/lista', async (req, res, next) => {
   const LIMIT_DEFAULT = 5;        // <- cámbialo a la cantidad que quieras
   const limit = LIMIT_DEFAULT;     // <- límite fijo
   const offset = (page - 1) * limit;
-
 
   try {
     const connection = await pool.getConnection();
@@ -180,7 +174,7 @@ app.get('/reparaciones/lista', async (req, res, next) => {
       JOIN marcas m ON mo.marca_id = m.marca_id
       JOIN tipos_equipos te ON m.tipo_id = te.tipo_id
       LEFT JOIN refacciones rf ON r.refaccion_id = rf.refaccion_id
-      LEFT JOIN tipo_refaccion tr ON rf.tipo_ref_id = tr.tipo_ref_id
+      LEFT JOIN tipo_refaccion tr ON r.tipo_ref_id = tr.tipo_ref_id
       JOIN usuarios u ON r.usuario_id = u.usuario_id
       JOIN areas a ON u.area_id = a.area_id
       WHERE 1=1
@@ -189,6 +183,7 @@ app.get('/reparaciones/lista', async (req, res, next) => {
     let where = '';
     const params = [];
 
+    // -------------------------------------------Filtros
     if (tipo_equipo) {
       where += ' AND te.nombre = ?';
       params.push(tipo_equipo);
@@ -211,31 +206,32 @@ app.get('/reparaciones/lista', async (req, res, next) => {
     }
     if (fecha_inicio && fecha_fin) {
       where += ' AND r.fecha BETWEEN ? AND ?';
-      params.push(fecha_inicio, fecha_fin);
+      params.push(fecha_inicio, fecha_fin + ' 23:59:59'); // Ajuste para incluir todo el día
     } else if (fecha_inicio) {
       where += ' AND r.fecha >= ?';
       params.push(fecha_inicio);
     } else if (fecha_fin) {
       where += ' AND r.fecha <= ?';
-      params.push(fecha_fin);
+      params.push(fecha_fin + ' 23:59:59'); // Ajuste para incluir todo el día
     }
 
-    // COUNT total
+    // -------------------------------------------COUNT total
     const countSql = `SELECT COUNT(*) AS total ${baseSql} ${where}`;
     const [countRows] = await connection.query(countSql, params);
     const total = countRows[0]?.total || 0;
     const totalPages = Math.max(Math.ceil(total / limit), 1);
 
-    // SELECT con orden y paginación
+    // -------------------------------------------SELECT con orden y paginación
     const selectSql = `
       SELECT 
+        r.reparacion_id,
         te.nombre AS tipo_equipo,
         m.nombre AS marca,
         mo.nombre AS modelo,
         r.inventario AS inventario_equipo,
         rf.nombre AS nombre_refaccion,
         tr.nombre AS tipo_refaccion,
-        rf.refaccion_inventario AS inventario_refaccion,
+        r.refaccion_inventario AS inventario_refaccion,
         r.descripcion AS descripcion_reparacion,
         r.fecha AS fecha_reparacion,
         r.hora AS hora_reparacion,
@@ -248,7 +244,7 @@ app.get('/reparaciones/lista', async (req, res, next) => {
     `;
     const [reparaciones] = await connection.query(selectSql, [...params, limit, offset]);
 
-    // Opciones para selects (sin cambios)
+    // -------------------------------------------Opciones para selects (sin cambios)
     const [tipos] = await connection.query(`
       SELECT DISTINCT te.nombre AS tipo_equipo
       FROM tipos_equipos te
@@ -280,6 +276,7 @@ app.get('/reparaciones/lista', async (req, res, next) => {
 
     connection.release();
 
+    // -------------------------------------------Renderizar vista
     res.render('lista-reparacion', {
       title: 'Lista de Reparaciones',
       reparaciones,
@@ -302,7 +299,8 @@ app.get('/reparaciones/lista', async (req, res, next) => {
   }
 });
 
-//----------------------------------CONSUMIBLES----------------------------------------------------------------------
+//  ///////////////////////////////////CONSUMIBLES
+
 // Ruta para mostrar formulario de consumibles
 app.get('/consumibles/nuevo', async (req, res) => {
   try {
@@ -352,7 +350,8 @@ app.post('/consumibles/nuevo', async (req, res) => {
   }
 });
 
-// ---------------------------------- LISTADO DE CONSUMIBLES (con paginación)
+// ////////////////////////////////////// LISTADO DE CONSUMIBLES (PAGINACIÓN)
+
 app.get('/consumibles/lista', async (req, res, next) => {
   const {
     consumible_id,
@@ -492,7 +491,7 @@ app.get('/consumibles/lista', async (req, res, next) => {
   }
 });
 
-// Login
+// ///////////////////////////////////////Login
 app.post('/login', (req, res) => {
   const { username, password } = req.body;
 

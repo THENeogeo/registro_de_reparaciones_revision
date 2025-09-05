@@ -81,7 +81,7 @@
 
       <!-- Tipo de refaccion-->
       <div class="input-box">
-        <select id="tipo_refaccion" name="tipo_refaccion" required>
+        <select id="tipo_refaccion" name="tipo_ref_id" required>
           <option value="">-- Selecciona el tipo de refacción -- ⬇️</option>
           <% tiposRef.forEach(tipo => { %>
             <option value="<%= tipo.tipo_ref_id %>"><%= tipo.nombre %></option>
@@ -89,13 +89,12 @@
         </select>
       </div>
 
-
       <!-- Inventario de refacción -->
       <div class="input-box">
         <input
           type="text"
-          id="inventario_refaccion"
-          name="inventario_refaccion"
+          id="refaccion_inventario"
+          name="refaccion_inventario"
           placeholder="Inventario o código de refacción"
           maxlength="50"
         >
@@ -116,7 +115,7 @@
       <!-- Expediente -->
       <div class="input-box">
         <input
-          type="text
+          type="text"
           id="expediente"
           name="expediente"
           placeholder="Expediente del usuario"
