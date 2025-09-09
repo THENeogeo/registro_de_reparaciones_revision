@@ -187,7 +187,7 @@
           throw new Error('Respuesta inesperada del servidor');
         }
 
-        marcaSelect.innerHTML = '<option value="">Selecciona una marca</option>';
+        marcaSelect.innerHTML = '<option value="">-- Selecciona una marca -- ⬇️</option>';
 
         marcas.forEach(marca => {
           const option = document.createElement('option');
@@ -220,7 +220,7 @@
 
       const modelos = await response.json();
 
-      modeloSelect.innerHTML = '<option value="">Selecciona un modelo</option>';
+      modeloSelect.innerHTML = '<option value="">-- Selecciona un modelo -- ⬇️</option>';
       modelos.forEach(modelo => {
         const option = document.createElement('option');
         option.value = modelo.modelo_id;
@@ -252,7 +252,7 @@
 
       const refacciones = await response.json();
 
-      refaccionSelect.innerHTML = '<option value="">Selecciona una refacción</option>';
+      refaccionSelect.innerHTML = '<option value="">-- Selecciona una refacción -- ⬇️</option>';
       refacciones.forEach(ref => {
         const option = document.createElement('option');
         option.value = ref.refaccion_id;
