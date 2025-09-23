@@ -160,7 +160,7 @@ app.get('/reparaciones/lista', async (req, res, next) => {
 
   // Paginación
   let page  = Math.max(parseInt(req.query.page || '1', 10), 1);
-  const LIMIT_DEFAULT = 5;        // <- cámbialo a la cantidad que quieras
+  const LIMIT_DEFAULT = 6;        // <- cámbialo a la cantidad que quieras
   const limit = LIMIT_DEFAULT;     // <- límite fijo
   const offset = (page - 1) * limit;
 
@@ -367,7 +367,7 @@ app.get('/consumibles/lista', async (req, res, next) => {
   // ➊ Lee paginación de la URL (con límites razonables)
   // Sustituye tu cálculo de limit por uno fijo:
   let page  = Math.max(parseInt(req.query.page || '1', 10), 1);
-  const LIMIT_DEFAULT = 5;        // <- cámbialo a la cantidad que quieras
+  const LIMIT_DEFAULT = 6;        // <- cámbialo a la cantidad que quieras
   const limit = LIMIT_DEFAULT;     // <- límite fijo
   const offset = (page - 1) * limit;
 
