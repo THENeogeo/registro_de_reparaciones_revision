@@ -137,8 +137,8 @@
             <%= inv.inventario_equipo %>
           </option>
         <% }) %>
-      </select>
-      
+      </select> 
+
       <input 
         type="date" 
         name="fecha_inicio" 
@@ -162,6 +162,9 @@
         <% }) %>
       </select>
 
+      <!-- Mantener paginación al cambiar filtros -->
+      <input type="hidden" name="limit" value="<%= typeof limit !== 'undefined' ? limit : 20 %>">
+      <input type="hidden" name="page"  value="1">
 
       <button type="submit">Buscar</button>
     </form>
@@ -196,6 +199,46 @@
       <% }) %>
     <% } %>
   </div>
+
+  <!-- Controles de paginación -->
+  <div class="search-bar-wrapper" style="margin-top: 10px; justify-content: center;">
+    <div class="search-bar" style="align-items:center; gap:10px;">
+      <!-- Botón Anterior -->
+      <form method="GET" action="/reparaciones/lista" style="display:flex; gap:10px; align-items:center;">
+        <input type="hidden" name="tipo_equipo"       value="<%= typeof tipo_equipo !== 'undefined' ? tipo_equipo : '' %>">
+        <input type="hidden" name="marca"             value="<%= typeof marca !== 'undefined' ? marca : '' %>">
+        <input type="hidden" name="modelo"            value="<%= typeof modelo !== 'undefined' ? modelo : '' %>">
+        <input type="hidden" name="inventario_equipo" value="<%= typeof inventario_equipo !== 'undefined' ? inventario_equipo : '' %>">
+        <input type="hidden" name="fecha_inicio"      value="<%= typeof fecha_inicio !== 'undefined' ? fecha_inicio : '' %>">
+        <input type="hidden" name="fecha_fin"         value="<%= typeof fecha_fin !== 'undefined' ? fecha_fin : '' %>">
+        <input type="hidden" name="area"              value="<%= typeof area !== 'undefined' ? area : '' %>">
+        <input type="hidden" name="limit"             value="<%= limit %>">
+        <input type="hidden" name="page"              value="<%= Math.max(page - 1, 1) %>">
+        <button type="submit" <%= page <= 1 ? 'disabled' : '' %>>« Anterior</button>
+      </form>
+
+      <!-- Indicador -->
+      <div>
+        Página <strong><%= page %></strong> de <strong><%= totalPages %></strong>
+        — <%= total %> resultado(s)
+      </div>
+
+      <!-- Botón Siguiente -->
+      <form method="GET" action="/reparaciones/lista" style="display:flex; gap:10px; align-items:center;">
+        <input type="hidden" name="tipo_equipo"       value="<%= typeof tipo_equipo !== 'undefined' ? tipo_equipo : '' %>">
+        <input type="hidden" name="marca"             value="<%= typeof marca !== 'undefined' ? marca : '' %>">
+        <input type="hidden" name="modelo"            value="<%= typeof modelo !== 'undefined' ? modelo : '' %>">
+        <input type="hidden" name="inventario_equipo" value="<%= typeof inventario_equipo !== 'undefined' ? inventario_equipo : '' %>">
+        <input type="hidden" name="fecha_inicio"      value="<%= typeof fecha_inicio !== 'undefined' ? fecha_inicio : '' %>">
+        <input type="hidden" name="fecha_fin"         value="<%= typeof fecha_fin !== 'undefined' ? fecha_fin : '' %>">
+        <input type="hidden" name="area"              value="<%= typeof area !== 'undefined' ? area : '' %>">
+        <input type="hidden" name="limit"             value="<%= limit %>">
+        <input type="hidden" name="page"              value="<%= Math.min(page + 1, totalPages) %>">
+        <button type="submit" <%= page >= totalPages ? 'disabled' : '' %>>Siguiente »</button>
+      </form>
+    </div>
+  </div>
+
 </div>
 
 </body>

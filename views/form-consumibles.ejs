@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Registro de Consumibles</title>
+  <link rel="stylesheet" href="/css/form-listas.css">
+</head>
+<body>
+
+<header class="top-header">
+  <img src="/img/logo.png" alt="Logo STE" class="logo-ste" />
+</header>
+
+<div class="logout-wrapper">
+  <button
+    type="button"
+    id="logoutBtn"
+    class="btn logout"
+    onclick="window.location.href='/dashboard.html'">
+    Regresar
+  </button>
+</div>
+
+<div class="container">
+  <h1>Registrar Consumible</h1>
+
+  <% if (success) { %>
+    <div class="alert success">
+      ¡Consumible registrado con éxito!
+    </div>
+  <% } %>
+
+  <div class="form-box">
+    <form action="/consumibles/nuevo" method="post">
+
+      <!-- Selección de consumible --> 
+      <div class="input-box">
+        <select id="consumible" name="consumible_id" required>
+          <option value="">-- Seleccionar consumible -- ⬇️</option>
+          <% consumibles.forEach(c => { %>
+            <option value="<%= c.consumible_id %>"><%= c.nombre %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <!-- Inventario -->
+      <div class="input-box">
+        <input type="text" 
+          id="inventario" 
+          name="inventario" 
+          placeholder="Inventario o número de serie"
+          maxlength="15"
+          oninput="this.value = this.value.replace(/[^0-9\-]/g, '')" 
+          
+        >
+      </div>
+
+      <!-- Marca -->
+      <div class="input-box">
+        <input type="text" 
+          id="marca" 
+          name="marca" 
+          placeholder="Marca del consumible"
+          maxlength="20"
+          required
+        >
+      </div>
+
+      <!-- Modelo -->
+      <div class="input-box">
+        <input 
+          type="text" 
+          id="modelo" 
+          name="modelo" 
+          placeholder="Modelo del consumible"
+          maxlength="50"
+          
+        >
+      </div>
+
+      <!-- Tipo de refaccion -->
+      <div class="input-box">
+        <select id="tipo_refaccion" name="tipo_ref_id" required>
+          <option value="">-- Selecciona el tipo de consumible -- ⬇️</option>
+          <% tiposRef.forEach(tipo => { %>
+            <option value="<%= tipo.tipo_ref_id %>"><%= tipo.nombre %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <!-- Descripción -->
+      <div class="input-box">
+        <textarea
+          id="descripcion"
+          name="descripcion"
+          rows="4"
+          placeholder="Descripción"
+          maxlength="100"
+          required
+        ></textarea>
+      </div>
+
+      <!-- Nombre del usuario -->
+      <div class="input-box">
+        <input
+          type="text"
+          id="nombre"
+          name="nombre"
+          placeholder="Nombre del usuario"
+          maxlength="50"
+          oninput="this.value = this.value.replace(/[^A-Za-z ]/g, '')"
+          
+        >
+      </div>
+
+      <!-- Área -->
+      <div class="input-box">
+        <select id="area" name="area_id" required>
+          <option value="">-- Selecciona un área -- ⬇️</option>
+          <% areas.forEach(a => { %>
+            <option value="<%= a.area_id %>"><%= a.nombre %></option>
+          <% }) %>
+        </select>
+      </div>
+
+      <!-- Botón -->
+      <button type="submit" class="btn">Guardar Registro</button>
+    </form>
+  </div>
+</div>
+
+</body>
+</html>

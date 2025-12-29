@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Nueva Reparación</title>
-  <link rel="stylesheet" href="/css/form-reparacion.css">
+  <link rel="stylesheet" href="/css/form-listas.css">
 </head>
 <body>
 
@@ -23,7 +23,7 @@
 
 
 <div class="container">
-  <h1>Registrar nueva reparación</h1>
+  <h1>Registrar Reparación</h1>
 
   <% if (success) { %>
     <div class="alert success">
@@ -66,8 +66,9 @@
           id="inventario_equipo"
           name="inventario_equipo"
           placeholder="Inventario del equipo"
-          maxlength="15"
-          required
+          maxlength="17"
+          oninput="this.value = this.value.replace(/[^0-9\-/ISN]/g, '')"
+        
         >
       </div>
 
@@ -80,7 +81,7 @@
 
       <!-- Tipo de refaccion-->
       <div class="input-box">
-        <select id="tipo_refaccion" name="tipo_refaccion" required>
+        <select id="tipo_refaccion" name="tipo_ref_id" required>
           <option value="">-- Selecciona el tipo de refacción -- ⬇️</option>
           <% tiposRef.forEach(tipo => { %>
             <option value="<%= tipo.tipo_ref_id %>"><%= tipo.nombre %></option>
@@ -88,16 +89,14 @@
         </select>
       </div>
 
-
       <!-- Inventario de refacción -->
       <div class="input-box">
         <input
           type="text"
-          id="inventario_refaccion"
-          name="inventario_refaccion"
-          placeholder="Inventario de refacción"
-          maxlength="15"
-          required
+          id="refaccion_inventario"
+          name="refaccion_inventario"
+          placeholder="Inventario o código de refacción"
+          maxlength="50"
         >
       </div>
 
@@ -108,7 +107,7 @@
           name="descripcion"
           rows="4"
           placeholder="Descripción de la reparación"
-          maxlength="100"
+          maxlength="300"
           required
         ></textarea>
       </div>
@@ -121,19 +120,19 @@
           name="expediente"
           placeholder="Expediente del usuario"
           maxlength="5"
-          required
+          oninput="this.value = this.value.replace(/[^0-9]/g, '')"
         >
       </div>
 
       <!-- Nombre -->
-      <div class="input-box">
+      <div class="input-box"> 
         <input
           type="text"
           id="nombre"
           name="nombre"
           placeholder="Nombre del usuario"
           maxlength="50"
-          required
+          oninput="this.value = this.value.replace(/[^A-Za-z ]/g, '')"
         >
       </div>
 
@@ -188,7 +187,7 @@
           throw new Error('Respuesta inesperada del servidor');
         }
 
-        marcaSelect.innerHTML = '<option value="">Selecciona una marca</option>';
+        marcaSelect.innerHTML = '<option value="">-- Selecciona una marca -- ⬇️</option>';
 
         marcas.forEach(marca => {
           const option = document.createElement('option');
@@ -221,7 +220,7 @@
 
       const modelos = await response.json();
 
-      modeloSelect.innerHTML = '<option value="">Selecciona un modelo</option>';
+      modeloSelect.innerHTML = '<option value="">-- Selecciona un modelo -- ⬇️</option>';
       modelos.forEach(modelo => {
         const option = document.createElement('option');
         option.value = modelo.modelo_id;
@@ -253,7 +252,7 @@
 
       const refacciones = await response.json();
 
-      refaccionSelect.innerHTML = '<option value="">Selecciona una refacción</option>';
+      refaccionSelect.innerHTML = '<option value="">-- Selecciona una refacción -- ⬇️</option>';
       refacciones.forEach(ref => {
         const option = document.createElement('option');
         option.value = ref.refaccion_id;

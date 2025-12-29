@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Lista de Consumibles</title>
+  <link rel="stylesheet" href="/css/form-reparacion.css">
+  <style>
+    .search-bar-wrapper {
+      display: flex;
+      justify-content: flex-end;
+      margin-top: 20px;
+      padding: 0 40px;
+    }
+
+    .search-bar {
+      background-color: #ffffff;
+      border-radius: 12px;
+      padding: 20px;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 15px;
+      max-width: 1000px;
+    }
+
+    .search-bar input,
+    .search-bar select {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      font-size: 14px;
+      min-width: 150px;
+    }
+
+    .search-bar button {
+      padding: 10px 20px;
+      background-color: #27f50b;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: bold;
+      transition: background-color 0.3s ease, transform 0.2s ease;
+    }
+
+    .search-bar button:hover {
+      background-color: #5b7ede;
+      transform: translateY(-2px);
+    }
+
+    .form-box {
+      padding: 40px;
+      max-height: 500px;
+      overflow-y: auto;
+    }
+
+    .input-box {
+      position: relative;
+      margin: 20px 0;
+      background: #f9f9f9;
+      border-radius: 10px;
+      padding: 20px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      transition: transform 0.3s ease;
+    }
+
+    .input-box:hover {
+      transform: translateY(-3px);
+      background: #f1f3f5;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 32px;
+      color: #ffffff;
+      padding-top: 30px;
+    }
+
+    .container {
+      width: 800px;
+      max-width: 95%;
+      background: #4361ee;
+      border-radius: 30px;
+      box-shadow: 0 0 30px rgba(0, 0, 0, 0.2);
+      overflow: hidden;
+    }
+  </style>
+</head>
+<body>
+
+<header class="top-header">
+  <img src="/img/logo.png" alt="Logo STE" class="logo-ste" />
+</header>
+
+<div class="logout-wrapper">
+  <button type="button" class="btn logout" onclick="window.location.href='/dashboard.html'">Regresar</button>
+</div>
+
+<div class="container">
+  <h1>Consumibles Registrados</h1>
+
+  <!-- Barra de filtros -->
+  <div class="search-bar-wrapper">
+    <form action="/consumibles/lista" method="GET" class="search-bar">
+      <select name="consumible_id">
+        <option value="">Consumible</option>
+        <% (consumibles || []).forEach(c => { %>
+          <option value="<%= c.consumible_id %>" <%= (String(c.consumible_id) === String(typeof consumible_id !== 'undefined' ? consumible_id : '')) ? 'selected' : '' %>>
+            <%= c.nombre %>
+          </option>
+        <% }) %>
+      </select>
+
+      <select name="marca">
+        <option value="">Marca</option>
+        <% (marcas || []).forEach(m => { %>
+          <option value="<%= m.marca %>" <%= (m.marca === (typeof marca !== 'undefined' ? marca : '')) ? 'selected' : '' %>>
+            <%= m.marca %>
+          </option>
+        <% }) %>
+      </select>
+
+      <select name="modelo">
+        <option value="">Modelo</option>
+        <% (modelos || []).forEach(mod => { %>
+          <option value="<%= mod.modelo %>" <%= (mod.modelo === (typeof modelo !== 'undefined' ? modelo : '')) ? 'selected' : '' %>>
+            <%= mod.modelo %>
+          </option>
+        <% }) %>
+      </select>
+
+      <select name="inventario">
+        <option value="">Inventario</option>
+        <% (inventarios || []).forEach(inv => { %>
+          <option value="<%= inv.inventario %>" <%= (inv.inventario === (typeof inventario !== 'undefined' ? inventario : '')) ? 'selected' : '' %>>
+            <%= inv.inventario %>
+          </option>
+        <% }) %>
+      </select>
+
+      <input 
+        type="date" 
+        name="fecha_inicio" 
+        value="<%= typeof fecha_inicio !== 'undefined' ? fecha_inicio : '' %>" 
+        placeholder="Fecha inicio" 
+      />
+
+      <input 
+        type="date" 
+        name="fecha_fin" 
+        value="<%= typeof fecha_fin !== 'undefined' ? fecha_fin : '' %>" 
+        placeholder="Fecha fin" 
+      />
+
+      <select name="area_id">
+        <option value="">Área</option>
+        <% (areas || []).forEach(a => { %>
+          <option value="<%= a.area_id %>" <%= (String(a.area_id) === String(typeof area_id !== 'undefined' ? area_id : '')) ? 'selected' : '' %>>
+            <%= a.nombre %>
+          </option>
+        <% }) %>
+      </select>
+
+      <button type="submit">Buscar</button>
+    </form>
+  </div>
+
+  <div class="form-box">
+    <% if (!registros || registros.length === 0) { %>
+      <div class="alert success">No hay consumibles registrados.</div>
+    <% } else { %>
+      <% registros.forEach(r => { %>
+        <div class="input-box">
+          <p><strong>Consumible:</strong> <%= r.consumible %></p>
+          <p><strong>Inventario:</strong> <%= r.inventario %></p>
+          <p><strong>Marca:</strong> <%= r.marca || '' %></p>
+          <p><strong>Modelo:</strong> <%= r.modelo || '' %></p>
+          <p><strong>Tipo de Consumible:</strong> <%= r.tipo_refaccion || '' %></p>
+          <p><strong>Descripción:</strong> <%= r.descripcion || '' %></p>
+
+          <p>
+            <strong>Fecha:</strong> <%= r.fecha %>
+            <strong>Hora:</strong> <%= r.hora %>
+          </p>
+
+          <p><strong>Usuario:</strong> <%= r.nombre_usuario || '' %></p>
+          <p><strong>Área:</strong> <%= r.area || '' %></p>
+        </div>
+      <% }) %>
+    <% } %>
+  </div>
+
+  <!-- Paginación -->
+  <div class="search-bar-wrapper" style="margin-top: 10px; justify-content: center;">
+    <div class="search-bar" style="align-items:center; gap:10px;">
+      <form method="GET" action="/consumibles/lista" style="display:flex; gap:10px; align-items:center;">
+        <!-- preserva filtros como inputs ocultos -->
+        <input type="hidden" name="consumible_id" value="<%= consumible_id %>">
+        <input type="hidden" name="marca"         value="<%= marca %>">
+        <input type="hidden" name="modelo"        value="<%= modelo %>">
+        <input type="hidden" name="inventario"    value="<%= inventario %>">
+        <input type="hidden" name="tipo_ref_id"   value="<%= typeof tipo_ref_id !== 'undefined' ? tipo_ref_id : '' %>">
+        <input type="hidden" name="area_id"       value="<%= area_id %>">
+        <input type="hidden" name="fecha_inicio"  value="<%= fecha_inicio %>">
+        <input type="hidden" name="fecha_fin"     value="<%= fecha_fin %>">
+        <input type="hidden" name="limit"         value="<%= limit %>">
+        <input type="hidden" name="page"          value="<%= Math.max(page - 1, 1) %>">
+        <button type="submit" <%= page <= 1 ? 'disabled' : '' %>>« Anterior</button>
+      </form>
+
+      <div>
+        Página <strong><%= page %></strong> de <strong><%= totalPages %></strong>
+        — <%= total %> resultado(s)
+      </div>
+
+      <form method="GET" action="/consumibles/lista" style="display:flex; gap:10px; align-items:center;">
+        <!-- preserva filtros como inputs ocultos -->
+        <input type="hidden" name="consumible_id" value="<%= consumible_id %>">
+        <input type="hidden" name="marca"         value="<%= marca %>">
+        <input type="hidden" name="modelo"        value="<%= modelo %>">
+        <input type="hidden" name="inventario"    value="<%= inventario %>">
+        <input type="hidden" name="tipo_ref_id"   value="<%= typeof tipo_ref_id !== 'undefined' ? tipo_ref_id : '' %>">
+        <input type="hidden" name="area_id"       value="<%= area_id %>">
+        <input type="hidden" name="fecha_inicio"  value="<%= fecha_inicio %>">
+        <input type="hidden" name="fecha_fin"     value="<%= fecha_fin %>">
+        <input type="hidden" name="limit"         value="<%= limit %>">
+        <input type="hidden" name="page"          value="<%= Math.min(page + 1, totalPages) %>">
+        <button type="submit" <%= page >= totalPages ? 'disabled' : '' %>>Siguiente »</button>
+      </form>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
